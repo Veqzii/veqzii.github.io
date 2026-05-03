@@ -96,25 +96,6 @@ All artwork created as original pieces to accompany game projects.
 
 ---
 
-## 📁 Structure
-
-```
-veqzii.github.io/
-├── index.html            ← Portfolio site (main page)
-├── style.css             ← Stylesheet
-├── main.js               ← Animations & interactivity
-├── dungeon_delve.html    ← Playable roguelike game
-├── rps_game.cpp          ← Rock Paper Scissors source code
-├── art/
-│   ├── rps-poster.png    ← RPS promotional poster
-│   └── snake-cover.png   ← Snake cover art
-└── docs/
-    ├── RPS_GDD.docx      ← Rock Paper Scissors Game Design Document
-    └── Project Proposal.pdf ← Snake research project proposal
-```
-
----
-
 ## 💻 Running Locally
 
 **Portfolio site:**
@@ -142,20 +123,10 @@ g++ rps_game.cpp -o rps_game $(sdl2-config --cflags --libs) -lSDL2_ttf -std=c++1
 
 ---
 
-## 📬 Contact
-
-| Platform | Link |
-|----------|------|
-| 📧 Email | [aashirgurung11@hotmail.com](mailto:aashirgurung11@hotmail.com) |
-| 💻 GitHub | [@veqzii](https://github.com/veqzii) |
-| 🌐 Portfolio | [veqzii.github.io](https://veqzii.github.io) |
-
----
-
 <div align="center">
 
 **Built with HTML · CSS · JavaScript · C++ · SDL2**
 
-*© 2021 Aashir Gurung — BSc Computer Games Technology, University of West London*
+*© 2021 Aashir Gurung*
 
 </div>
