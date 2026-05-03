@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DUNGEON DELVE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a12;--panel:#12121e;--border:#2a2a4a;
+  --gold:#f5a623;--red:#e53935;--green:#43a047;
+  --blue:#1e88e5;--purple:#8e24aa;--cyan:#00bcd4;
+  --text:#e8e0d0;--dim:#888;
+  --hp-bar:#e53935;--mp-bar:#1565c0;--xp-bar:#f9a825;
+}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;overflow:hidden;user-select:none;}
+canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
+
+/* ── UI OVERLAY ── */
+#ui{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;}
+
+/* HUD top-left */
+#hud{position:absolute;top:8px;left:8px;pointer-events:none;}
+.hud-name{font-size:13px;font-weight:bold;color:var(--gold);margin-bottom:4px;letter-spacing:1px;}
+.bar-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.bar-label{font-size:10px;width:20px;color:var(--dim);}
+.bar-outer{width:140px;height:9px;background:#1a1a2e;border:1px solid #333;border-radius:2px;overflow:hidden;}
+.bar-inner{height:100%;border-radius:1px;transition:width 0.15s;}
+.bar-val{font-size:9px;color:var(--dim);min-width:50px;}
+#bar-hp .bar-inner{background:var(--hp-bar);}
+#bar-mp .bar-inner{background:var(--mp-bar);}
+#bar-xp .bar-inner{background:var(--xp-bar);}
+.hud-stats{font-size:10px;color:var(--dim);margin-top:4px;line-height:1.6;}
+.hud-stats span{color:var(--text);}
+
+/* HUD top-right */
+#hud-right{position:absolute;top:8px;right:8px;text-align:right;pointer-events:none;}
+.hud-gold{font-size:14px;color:var(--gold);font-weight:bold;}
+.hud-floor{font-size:10px;color:var(--dim);margin-top:2px;}
+.hud-kills{font-size:10px;color:var(--dim);}
+
+/* Hotbar */
+#hotbar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px;pointer-events:all;}
+.hb-slot{width:48px;height:48px;background:#0e0e1a;border:2px solid #2a2a4a;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;cursor:pointer;transition:border-color 0.1s;}
+.hb-slot:hover{border-color:#555;}
+.hb-slot.active{border-color:var(--gold);}
+.hb-slot.active::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:var(--gold);border-radius:50%;}
+.hb-icon{font-size:20px;line-height:1;}
+.hb-key{position:absolute;top:2px;left:3px;font-size:8px;color:#555;}
+.hb-cd{position:absolute;bottom:2px;right:3px;font-size:8px;color:var(--cyan);}
+.hb-count{position:absolute;bottom:2px;right:3px;font-size:9px;color:var(--gold);}
+
+/* Messages log */
+#msglog{position:absolute;bottom:68px;left:8px;width:300px;pointer-events:none;}
+.msg{font-size:10px;line-height:1.5;opacity:1;transition:opacity 2s;}
+.msg.fade{opacity:0;}
+.msg.dmg{color:#ff6b6b;}
+.msg.heal{color:#69db7c;}
+.msg.gold{color:var(--gold);}
+.msg.info{color:#74c0fc;}
+.msg.loot{color:#da77f2;}
+.msg.warn{color:#ffa94d;}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:50;background:rgba(0,0,0,0.85);}
+.screen.hidden{display:none;}
+
+/* Title screen */
+#screen-title{background:radial-gradient(ellipse at 50% 40%,#0d0d1f 0%,#000 100%);}
+.title-box{text-align:center;max-width:500px;}
+.title-logo{font-size:52px;font-weight:900;letter-spacing:8px;color:var(--gold);text-shadow:0 0 30px rgba(245,166,35,0.5);margin-bottom:8px;}
+.title-sub{font-size:12px;letter-spacing:4px;color:var(--dim);margin-bottom:48px;}
+.class-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px;}
+.class-card{background:#0e0e1e;border:2px solid #2a2a4a;border-radius:8px;padding:16px;cursor:pointer;transition:all 0.2s;text-align:left;}
+.class-card:hover,.class-card.selected{border-color:var(--gold);background:#141428;}
+.class-icon{font-size:32px;margin-bottom:8px;}
+.class-name{font-size:14px;font-weight:bold;color:var(--gold);margin-bottom:4px;}
+.class-desc{font-size:10px;color:var(--dim);line-height:1.5;}
+.class-stats{font-size:9px;color:#555;margin-top:6px;}
+.btn-start{background:var(--gold);color:#000;border:none;padding:12px 48px;font-family:'Courier New',monospace;font-size:14px;font-weight:bold;letter-spacing:3px;cursor:pointer;border-radius:4px;transition:all 0.2s;}
+.btn-start:hover{background:#ffc84a;transform:translateY(-1px);}
+.controls-hint{font-size:9px;color:#444;margin-top:20px;line-height:1.8;}
+
+/* Shop screen */
+#screen-shop{background:rgba(5,5,15,0.95);}
+.shop-box{background:#0e0e1e;border:2px solid var(--gold);border-radius:12px;padding:28px;width:680px;max-height:85vh;overflow-y:auto;}
+.shop-title{font-size:22px;font-weight:bold;color:var(--gold);letter-spacing:4px;text-align:center;margin-bottom:4px;}
+.shop-sub{text-align:center;font-size:10px;color:var(--dim);margin-bottom:20px;letter-spacing:2px;}
+.shop-gold{text-align:right;font-size:13px;color:var(--gold);margin-bottom:16px;}
+.shop-section{font-size:10px;letter-spacing:3px;color:var(--dim);border-bottom:1px solid #1e1e2e;padding-bottom:4px;margin-bottom:12px;margin-top:16px;}
+.shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;}
+.shop-item{background:#0a0a18;border:1px solid #2a2a4a;border-radius:6px;padding:12px;cursor:pointer;transition:all 0.15s;position:relative;}
+.shop-item:hover:not(.cant-afford){border-color:var(--gold);background:#12122a;}
+.shop-item.cant-afford{opacity:0.4;cursor:not-allowed;}
+.shop-item.owned{border-color:var(--green);opacity:0.6;cursor:not-allowed;}
+.si-icon{font-size:24px;margin-bottom:6px;}
+.si-name{font-size:11px;font-weight:bold;color:var(--text);margin-bottom:3px;}
+.si-desc{font-size:9px;color:var(--dim);line-height:1.4;margin-bottom:6px;}
+.si-price{font-size:11px;color:var(--gold);font-weight:bold;}
+.si-tag{display:inline-block;font-size:8px;padding:1px 5px;border-radius:2px;margin-bottom:4px;}
+.si-tag.weapon{background:#1a2a1a;color:#69db7c;}
+.si-tag.potion{background:#2a1a1a;color:#ff6b6b;}
+.si-tag.magic{background:#1a1a3a;color:#74c0fc;}
+.si-tag.passive{background:#2a2a1a;color:var(--gold);}
+.btn-leave{display:block;width:100%;padding:10px;background:#1a1a2e;border:1px solid #3a3a5a;color:var(--text);font-family:'Courier New',monospace;font-size:12px;letter-spacing:2px;cursor:pointer;border-radius:4px;margin-top:16px;transition:all 0.2s;}
+.btn-leave:hover{background:#2a2a4a;border-color:var(--gold);}
+
+/* Death / Win screen */
+#screen-dead .dead-box,#screen-win .win-box{text-align:center;padding:40px;}
+.dead-title{font-size:48px;font-weight:900;color:var(--red);letter-spacing:6px;text-shadow:0 0 20px rgba(229,57,53,0.6);margin-bottom:12px;}
+.win-title{font-size:48px;font-weight:900;color:var(--gold);letter-spacing:6px;text-shadow:0 0 20px rgba(245,166,35,0.6);margin-bottom:12px;}
+.dead-stats{font-size:12px;color:var(--dim);line-height:2;margin:20px 0;}
+.btn-restart{background:transparent;border:2px solid var(--gold);color:var(--gold);padding:10px 40px;font-family:'Courier New',monospace;font-size:13px;letter-spacing:3px;cursor:pointer;border-radius:4px;transition:all 0.2s;margin-top:16px;}
+.btn-restart:hover{background:var(--gold);color:#000;}
+
+/* Tooltip */
+#tooltip{position:fixed;background:#0e0e1e;border:1px solid #3a3a5a;border-radius:6px;padding:10px 14px;font-size:10px;color:var(--text);pointer-events:none;z-index:100;max-width:200px;line-height:1.6;display:none;}
+
+/* Ability bar labels */
+#ability-hints{position:absolute;bottom:62px;left:50%;transform:translateX(-50%);display:flex;gap:4px;pointer-events:none;}
+.ab-hint{width:48px;text-align:center;font-size:8px;color:#444;}
+
+/* Floor transition */
+#floor-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:bold;letter-spacing:6px;color:var(--gold);text-shadow:0 0 20px rgba(245,166,35,0.8);pointer-events:none;z-index:40;opacity:0;transition:opacity 0.5s;}
+</style>
+</head>
+<body>
+
+<!-- Canvas -->
+<canvas id="c"></canvas>
+
+<!-- UI Overlay -->
+<div id="ui">
+  <!-- HUD left -->
+  <div id="hud">
+    <div class="hud-name" id="hud-class">WARRIOR</div>
+    <div class="bar-row" id="bar-hp">
+      <div class="bar-label">HP</div>
+      <div class="bar-outer"><div class="bar-inner" id="hp-fill" style="width:100%"></div></div>
+      <div class="bar-val" id="hp-val">100/100</div>
+    </div>
+    <div class="bar-row" id="bar-mp">
+      <div class="bar-label">MP</div>
+      <div class="bar-outer"><div class="bar-inner" id="mp-fill" style="width:100%"></div></div>
+      <div class="bar-val" id="mp-val">50/50</div>
+    </div>
+    <div class="bar-row" id="bar-xp">
+      <div class="bar-label">XP</div>
+      <div class="bar-outer"><div class="bar-inner" id="xp-fill" style="width:0%"></div></div>
+      <div class="bar-val" id="xp-val">Lv.1</div>
+    </div>
+    <div class="hud-stats">
+      ATK <span id="stat-atk">8</span> &nbsp; DEF <span id="stat-def">2</span> &nbsp; SPD <span id="stat-spd">3</span> &nbsp; WEAPON <span id="stat-wpn">Sword</span>
+    </div>
+  </div>
+
+  <!-- HUD right -->
+  <div id="hud-right">
+    <div class="hud-gold">⬡ <span id="hud-gold-val">0</span> GOLD</div>
+    <div class="hud-floor">FLOOR <span id="hud-floor">1</span></div>
+    <div class="hud-kills">KILLS <span id="hud-kills">0</span></div>
+  </div>
+
+  <!-- Hotbar -->
+  <div id="hotbar">
+    <div class="hb-slot active" id="slot-0" title="">
+      <div class="hb-key">1</div>
+      <div class="hb-icon" id="slot-0-icon">⚔️</div>
+      <div class="hb-cd" id="slot-0-cd"></div>
+    </div>
+    <div class="hb-slot" id="slot-1" title="">
+      <div class="hb-key">2</div>
+      <div class="hb-icon" id="slot-1-icon">🛡️</div>
+      <div class="hb-cd" id="slot-1-cd"></div>
+    </div>
+    <div class="hb-slot" id="slot-2" title="">
+      <div class="hb-key">3</div>
+      <div class="hb-icon" id="slot-2-icon">💊</div>
+      <div class="hb-count" id="slot-2-cd">0</div>
+    </div>
+    <div class="hb-slot" id="slot-3" title="">
+      <div class="hb-key">4</div>
+      <div class="hb-icon" id="slot-3-icon">💣</div>
+      <div class="hb-count" id="slot-3-cd">0</div>
+    </div>
+    <div class="hb-slot" id="slot-4" title="">
+      <div class="hb-key">5</div>
+      <div class="hb-icon" id="slot-4-icon">✨</div>
+      <div class="hb-cd" id="slot-4-cd"></div>
+    </div>
+  </div>
+  <div id="ability-hints">
+    <div class="ab-hint">ATK</div>
+    <div class="ab-hint">BLOCK</div>
+    <div class="ab-hint">POTION</div>
+    <div class="ab-hint">BOMB</div>
+    <div class="ab-hint">SPECIAL</div>
+  </div>
+
+  <!-- Message log -->
+  <div id="msglog"></div>
+</div>
+
+<!-- Floor banner -->
+<div id="floor-banner" id="floor-banner"></div>
+
+<!-- Tooltip -->
+<div id="tooltip"></div>
+
+<!-- ── SCREENS ── -->
+
+<!-- Title -->
+<div class="screen" id="screen-title">
+  <div class="title-box">
+    <div class="title-logo">DUNGEON<br/>DELVE</div>
+    <div class="title-sub">A ROGUELIKE ADVENTURE</div>
+    <div class="class-grid" id="class-grid">
+      <div class="class-card selected" data-class="warrior" onclick="selectClass(this,'warrior')">
+        <div class="class-icon">⚔️</div>
+        <div class="class-name">WARRIOR</div>
+        <div class="class-desc">Master of blades. High damage, medium HP. Can unlock dual daggers, great sword & whirlwind.</div>
+        <div class="class-stats">HP:100 MP:30 ATK:10 DEF:4</div>
+      </div>
+      <div class="class-card" data-class="rogue" onclick="selectClass(this,'rogue')">
+        <div class="class-icon">🗡️</div>
+        <div class="class-name">ROGUE</div>
+        <div class="class-desc">Speedy assassin. Low HP but fast attacks. Backstab & poison abilities.</div>
+        <div class="class-stats">HP:70 MP:40 ATK:12 DEF:2</div>
+      </div>
+      <div class="class-card" data-class="mage" onclick="selectClass(this,'mage')">
+        <div class="class-icon">🔮</div>
+        <div class="class-name">MAGE</div>
+        <div class="class-desc">Staff wielder with mana mechanics. Fireballs, ice bolts, arcane burst. Mana regen items in shop.</div>
+        <div class="class-stats">HP:60 MP:120 ATK:6 DEF:1</div>
+      </div>
+      <div class="class-card" data-class="miner" onclick="selectClass(this,'miner')">
+        <div class="class-icon">⛏️</div>
+        <div class="class-name">MINER</div>
+        <div class="class-desc">Pickaxe brawler. Finds extra gold & chests. Tunnel through walls. Slam AoE attacks.</div>
+        <div class="class-stats">HP:110 MP:20 ATK:9 DEF:5</div>
+      </div>
+    </div>
+    <button class="btn-start" onclick="startGame()">ENTER DUNGEON</button>
+    <div class="controls-hint">
+      WASD / ARROWS — Move &nbsp;|&nbsp; 1-5 — Abilities &nbsp;|&nbsp; SPACE — Attack &nbsp;|&nbsp; E — Interact<br/>
+      Reach the STAIRS ▼ to descend. Every 3 floors visit the SHOP.
+    </div>
+  </div>
+</div>
+
+<!-- Shop -->
+<div class="screen hidden" id="screen-shop">
+  <div class="shop-box">
+    <div class="shop-title">⬡ THE SHOP ⬡</div>
+    <div class="shop-sub">SPEND YOUR GOLD WISELY, ADVENTURER</div>
+    <div class="shop-gold">Your gold: ⬡ <span id="shop-gold-disp">0</span></div>
+    <div id="shop-content"></div>
+    <button class="btn-leave" onclick="leaveShop()">▼ CONTINUE TO NEXT FLOOR ▼</button>
+  </div>
+</div>
+
+<!-- Dead -->
+<div class="screen hidden" id="screen-dead">
+  <div class="dead-box">
+    <div class="dead-title">YOU DIED</div>
+    <div class="dead-stats" id="dead-stats"></div>
+    <button class="btn-restart" onclick="location.reload()">RISE AGAIN</button>
+  </div>
+</div>
+
+<!-- Win -->
+<div class="screen hidden" id="screen-win">
+  <div class="win-box">
+    <div class="win-title">VICTORY!</div>
+    <div class="dead-stats" id="win-stats"></div>
+    <button class="btn-restart" onclick="location.reload()">PLAY AGAIN</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DUNGEON DELVE — Full Roguelike Engine
+// ═══════════════════════════════════════════════════════════════
+
+const C = document.getElementById('c');
+const CTX = C.getContext('2d');
+C.width = window.innerWidth;
+C.height = window.innerHeight;
+window.addEventListener('resize', () => { C.width=window.innerWidth; C.height=window.innerHeight; });
+
+// ── CONSTANTS ──
+const TS = 24; // tile size px
+const COLS = Math.floor(C.width/TS)|0;
+const ROWS = Math.floor(C.height/TS)|0;
+const DUNGEON_W = 60, DUNGEON_H = 40;
+
+// ── TILES ──
+const T = { VOID:0, FLOOR:1, WALL:2, DOOR:3, STAIRS:4, CHEST:5, SHOP_PORTAL:6 };
+
+// ── COLORS ──
+const PALETTE = {
+  [T.VOID]:'#050508',
+  [T.FLOOR]:'#141420',
+  [T.WALL]:'#1e1e30',
+  wall_top:'#2a2a42',
+  [T.DOOR]:'#6b3a1e',
+  [T.STAIRS]:'#2a4a2a',
+  stairs_sym:'#69db7c',
+  [T.CHEST]:'#4a3a00',
+  chest_sym:'#f5a623',
+  [T.SHOP_PORTAL]:'#1a0a2e',
+  portal_sym:'#da77f2',
+};
+
+// ── INPUT ──
+const KEYS = {};
+window.addEventListener('keydown', e => {
+  KEYS[e.code] = true;
+  handleAbilityKey(e.code);
+  if(e.code==='KeyE') handleInteract();
+  if(e.code==='Space') { e.preventDefault(); triggerAttack(); }
+});
+window.addEventListener('keyup', e => { KEYS[e.code] = false; });
+
+// ── GAME STATE ──
+let G = null; // main game object, created on startGame()
+
+// ── CLASS SELECTION ──
+let selectedClass = 'warrior';
+function selectClass(el, cls) {
+  document.querySelectorAll('.class-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedClass = cls;
+}
+
+// ── CLASS DEFINITIONS ──
+const CLASSES = {
+  warrior: {
+    name:'WARRIOR', icon:'⚔️', color:'#e53935',
+    hp:100, mp:30, atk:10, def:4, spd:3,
+    weapon:'Sword', weaponIcon:'⚔️',
+    mpRegen:0.2,
+    abilities: ['slash','block','potion','bomb','whirlwind'],
+    abilityIcons: ['⚔️','🛡️','💊','💣','🌀'],
+    abilityNames: ['Slash','Block','Potion','Bomb','Whirlwind'],
+  },
+  rogue: {
+    name:'ROGUE', icon:'🗡️', color:'#8e24aa',
+    hp:70, mp:40, atk:12, def:2, spd:5,
+    weapon:'Dagger', weaponIcon:'🗡️',
+    mpRegen:0.3,
+    abilities: ['stab','dodge','potion','bomb','poison_cloud'],
+    abilityIcons: ['🗡️','💨','💊','💣','☠️'],
+    abilityNames: ['Stab','Dodge','Potion','Bomb','Poison Cloud'],
+  },
+  mage: {
+    name:'MAGE', icon:'🔮', color:'#1e88e5',
+    hp:60, mp:120, atk:6, def:1, spd:3,
+    weapon:'Staff', weaponIcon:'🪄',
+    mpRegen:1.0,
+    abilities: ['fireball','ice_bolt','potion','arcane_burst','mana_shield'],
+    abilityIcons: ['🔥','❄️','💊','✨','🔯'],
+    abilityNames: ['Fireball','Ice Bolt','Potion','Arcane Burst','Mana Shield'],
+  },
+  miner: {
+    name:'MINER', icon:'⛏️', color:'#f9a825',
+    hp:110, mp:20, atk:9, def:5, spd:2,
+    weapon:'Pickaxe', weaponIcon:'⛏️',
+    mpRegen:0.1,
+    abilities: ['slam','tunnel','potion','bomb','seismic'],
+    abilityIcons: ['⛏️','🕳️','💊','💣','💥'],
+    abilityNames: ['Slam','Tunnel','Potion','Bomb','Seismic'],
+  }
+};
+
+// ── SHOP INVENTORY ──
+const SHOP_ITEMS = {
+  // WEAPONS
+  greatsword:    { name:'Greatsword',     icon:'🗡️', type:'weapon', tag:'weapon', price:80,  desc:'+15 ATK, slow swing. Cleave 2 targets.',  atk:15, classes:['warrior'],      effect:'weapon_gs' },
+  dual_daggers:  { name:'Dual Daggers',   icon:'🔪', type:'weapon', tag:'weapon', price:70,  desc:'+10 ATK, double hit chance 30%.',          atk:10, classes:['warrior','rogue'], effect:'weapon_dd' },
+  poison_blade:  { name:'Poison Blade',   icon:'🗡️', type:'weapon', tag:'weapon', price:90,  desc:'+8 ATK. Attacks poison enemies (3 ticks).', atk:8, classes:['rogue'],       effect:'weapon_pb' },
+  mage_staff:    { name:'Arcane Staff',   icon:'🪄', type:'weapon', tag:'magic',  price:85,  desc:'+12 SPELL PWR. Spells cost 2 less mana.',   spellPwr:12, classes:['mage'],   effect:'weapon_ms' },
+  ice_staff:     { name:'Frost Staff',    icon:'🌊', type:'weapon', tag:'magic',  price:100, desc:'+10 SPL, spells slow enemies 2s.',           spellPwr:10, classes:['mage'],  effect:'weapon_is' },
+  pickaxe_plus:  { name:'Diamond Pick',   icon:'💎', type:'weapon', tag:'weapon', price:75,  desc:'+12 ATK, +50% gold from walls & chests.',   atk:12, classes:['miner'],       effect:'weapon_dp' },
+
+  // POTIONS
+  health_pot:    { name:'Health Potion',  icon:'❤️', type:'consumable', tag:'potion', price:25, desc:'Restore 40 HP instantly.',             qty:1, effect:'hp_pot' },
+  mega_pot:      { name:'Mega Potion',    icon:'💖', type:'consumable', tag:'potion', price:55, desc:'Restore 80 HP + 20 MP.',               qty:1, effect:'mega_pot' },
+  mana_pot:      { name:'Mana Potion',    icon:'💙', type:'consumable', tag:'potion', price:30, desc:'Restore 50 MP instantly.',             qty:1, effect:'mp_pot' },
+  bomb:          { name:'Bomb',           icon:'💣', type:'consumable', tag:'potion', price:20, desc:'AoE explosion 3-tile radius, 30 dmg.', qty:1, effect:'bomb' },
+  smoke_bomb:    { name:'Smoke Bomb',     icon:'💨', type:'consumable', tag:'potion', price:35, desc:'AoE blind+slow all enemies 4s.',        qty:1, effect:'smoke' },
+  molotov:       { name:'Molotov',        icon:'🔥', type:'consumable', tag:'potion', price:40, desc:'Burns 5-tile area for 5 ticks, 8/tick.',qty:1, effect:'molotov' },
+
+  // PASSIVE UPGRADES
+  hp_up:         { name:'Ruby Amulet',    icon:'💎', type:'passive', tag:'passive', price:60,  desc:'+30 max HP permanently.',              effect:'hp_up' },
+  atk_up:        { name:'War Totem',      icon:'⚡', type:'passive', tag:'passive', price:65,  desc:'+5 ATK permanently.',                  effect:'atk_up' },
+  def_up:        { name:'Iron Skin',      icon:'🛡️', type:'passive', tag:'passive', price:55,  desc:'+3 DEF permanently.',                  effect:'def_up' },
+  speed_boots:   { name:'Swift Boots',    icon:'👟', type:'passive', tag:'passive', price:70,  desc:'+2 movement speed.',                    effect:'spd_up' },
+  mana_crystal:  { name:'Mana Crystal',   icon:'🔵', type:'passive', tag:'magic',  price:75,  desc:'+40 max MP + double mana regen.',       effect:'mp_up', classes:['mage','rogue'] },
+  infinite_mana: { name:'Void Gem',       icon:'♾️', type:'passive', tag:'magic',  price:200, desc:'INFINITE MANA for 1 floor.',            effect:'inf_mana', classes:['mage'] },
+  lucky_coin:    { name:'Lucky Coin',     icon:'🪙', type:'passive', tag:'passive', price:50,  desc:'+25% gold from all sources.',          effect:'gold_boost' },
+  vampire:       { name:'Vampire Ring',   icon:'💍', type:'passive', tag:'passive', price:110, desc:'Heal 15% of damage dealt.',            effect:'lifesteal' },
+  mana_regen_boost: { name:'Mana Stone', icon:'🌀', type:'passive', tag:'magic',  price:80,  desc:'Triple mana regen rate.',              effect:'mp_regen_boost', classes:['mage','rogue'] },
+};
+
+// ── MAP GENERATION ──
+function genDungeon(floor) {
+  const map = Array.from({length:DUNGEON_H}, ()=>new Uint8Array(DUNGEON_W).fill(T.VOID));
+  const rooms = [];
+  const NUM_ROOMS = 8 + Math.min(floor*2, 12);
+
+  function carveRoom(x,y,w,h) {
+    for(let ry=y;ry<y+h;ry++)
+      for(let rx=x;rx<x+w;rx++)
+        if(ry>0&&ry<DUNGEON_H-1&&rx>0&&rx<DUNGEON_W-1) map[ry][rx]=T.FLOOR;
+  }
+  function carveCorridor(x1,y1,x2,y2) {
+    let x=x1,y=y1;
+    while(x!==x2){map[y][x]=T.FLOOR;x+=x<x2?1:-1;}
+    while(y!==y2){map[y][x]=T.FLOOR;y+=y<y2?1:-1;}
+  }
+
+  // Generate rooms
+  for(let i=0;i<NUM_ROOMS;i++){
+    const w=5+Math.floor(Math.random()*6), h=4+Math.floor(Math.random()*5);
+    const x=1+Math.floor(Math.random()*(DUNGEON_W-w-2));
+    const y=1+Math.floor(Math.random()*(DUNGEON_H-h-2));
+    carveRoom(x,y,w,h);
+    rooms.push({x,y,w,h,cx:x+Math.floor(w/2),cy:y+Math.floor(h/2)});
+  }
+  // Connect rooms
+  for(let i=1;i<rooms.length;i++) carveCorridor(rooms[i-1].cx,rooms[i-1].cy,rooms[i].cx,rooms[i].cy);
+
+  // Wall generation — any floor adjacent to void becomes wall
+  const walls = Array.from({length:DUNGEON_H}, ()=>new Uint8Array(DUNGEON_W));
+  for(let y=0;y<DUNGEON_H;y++)
+    for(let x=0;x<DUNGEON_W;x++) {
+      if(map[y][x]===T.FLOOR) continue;
+      let adj=false;
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++) {
+        const ny=y+dy,nx=x+dx;
+        if(ny>=0&&ny<DUNGEON_H&&nx>=0&&nx<DUNGEON_W&&map[ny][nx]===T.FLOOR) adj=true;
+      }
+      if(adj) walls[y][x]=1;
+    }
+  for(let y=0;y<DUNGEON_H;y++)
+    for(let x=0;x<DUNGEON_W;x++)
+      if(walls[y][x]) map[y][x]=T.WALL;
+
+  // Place stairs in last room
+  const lastRoom = rooms[rooms.length-1];
+  map[lastRoom.cy][lastRoom.cx] = T.STAIRS;
+
+  // Place chests
+  const numChests = 2 + Math.floor(floor/2);
+  for(let i=0;i<numChests;i++){
+    const r = rooms[1+Math.floor(Math.random()*(rooms.length-2))];
+    const cx = r.x+1+Math.floor(Math.random()*(r.w-2));
+    const cy = r.y+1+Math.floor(Math.random()*(r.h-2));
+    if(map[cy][cx]===T.FLOOR) map[cy][cx]=T.CHEST;
+  }
+
+  // Spawn enemies
+  const enemies = [];
+  const numEnemies = 4 + floor*2 + Math.floor(Math.random()*4);
+  for(let i=0;i<numEnemies;i++){
+    const r = rooms[1+Math.floor(Math.random()*(rooms.length-1))];
+    const ex = r.x+1+Math.floor(Math.random()*(r.w-2));
+    const ey = r.y+1+Math.floor(Math.random()*(r.h-2));
+    if(map[ey][ex]===T.FLOOR) {
+      enemies.push(spawnEnemy(ex,ey,floor));
+    }
+  }
+
+  // Player start
+  const startRoom = rooms[0];
+  const px = startRoom.cx, py = startRoom.cy;
+
+  return { map, rooms, enemies, px, py };
+}
+
+// ── ENEMY TYPES ──
+const ENEMY_TYPES = [
+  { name:'Slime',    icon:'🟢', hp:20,  atk:4,  def:0, spd:1, xp:5,  gold:[1,4],  color:'#69db7c', size:0.7 },
+  { name:'Goblin',   icon:'👺', hp:35,  atk:7,  def:1, spd:2, xp:8,  gold:[3,8],  color:'#a9e34b', size:0.9 },
+  { name:'Skeleton', icon:'💀', hp:45,  atk:10, def:2, spd:2, xp:12, gold:[4,10], color:'#dee2e6', size:1.0 },
+  { name:'Orc',      icon:'👹', hp:70,  atk:14, def:3, spd:1, xp:18, gold:[6,14], color:'#e67700', size:1.1 },
+  { name:'Vampire',  icon:'🧛', hp:55,  atk:12, def:2, spd:3, xp:20, gold:[8,16], color:'#9c36b5', size:1.0, lifesteal:true },
+  { name:'Troll',    icon:'🧌', hp:100, atk:18, def:5, spd:1, xp:30, gold:[10,20],color:'#74c0fc', size:1.2 },
+  { name:'Wizard',   icon:'🧙', hp:40,  atk:16, def:1, spd:2, xp:25, gold:[12,20],color:'#da77f2', size:1.0, ranged:true },
+  { name:'Dragon',   icon:'🐉', hp:200, atk:25, def:8, spd:2, xp:80, gold:[40,80],color:'#ff6b6b', size:1.4, boss:true },
+];
+
+let eidSeq = 0;
+function spawnEnemy(x, y, floor) {
+  const typePool = ENEMY_TYPES.filter(e => !e.boss || floor >= 9);
+  const t = typePool[Math.floor(Math.random() * Math.min(typePool.length, 3 + Math.floor(floor/2)))];
+  const scale = 1 + floor * 0.08;
+  return {
+    id: eidSeq++, x, y, type: t.name,
+    hp: Math.floor(t.hp * scale), maxHp: Math.floor(t.hp * scale),
+    atk: Math.floor(t.atk * scale), def: t.def, spd: t.spd,
+    xp: t.xp, goldMin: t.gold[0], goldMax: t.gold[1],
+    color: t.color, icon: t.icon, size: t.size||1,
+    ranged: t.ranged||false, lifesteal: t.lifesteal||false, boss: t.boss||false,
+    moveTimer: 0, attackTimer: 0,
+    statusEffects: [], // {type, duration, tick}
+    vx:0, vy:0, // visual shake
+    dmgFlash:0,
+  };
+}
+
+// ── PROJECTILES & EFFECTS ──
+let projectiles = [];
+let particles   = [];
+let dmgNumbers  = [];
+let burnTiles   = [];
+
+function addParticle(x, y, color, vx, vy, life=30, size=3) {
+  particles.push({x,y,color,vx,vy,life,maxLife:life,size});
+}
+function addDmgNumber(wx, wy, text, color='#ff6b6b') {
+  dmgNumbers.push({wx,wy,text,color,life:50,vy:-0.04});
+}
+function spawnBlood(wx, wy, color='#e53935', count=6) {
+  for(let i=0;i<count;i++) addParticle(wx,wy,color,
+    (Math.random()-0.5)*0.1,(Math.random()-0.5)*0.1-0.05,20+Math.random()*20,2+Math.random()*2);
+}
+
+// ── MAIN GAME CLASS ──
+function createGame(cls) {
+  const cd = CLASSES[cls];
+  const dungeon = genDungeon(1);
+  return {
+    cls, clsData: cd,
+    // Player stats
+    px: dungeon.px, py: dungeon.py,
+    hp: cd.hp, maxHp: cd.hp,
+    mp: cd.mp, maxMp: cd.mp,
+    xp: 0, xpNext: 30, level: 1,
+    atk: cd.atk, def: cd.def, spd: cd.spd,
+    weapon: cd.weapon, weaponIcon: cd.weaponIcon,
+    gold: 0, kills: 0,
+    floor: 1,
+    // Movement
+    moveTimer: 0, moveDelay: Math.max(6-cd.spd,1),
+    facing: {dx:1,dy:0},
+    // Ability cooldowns (in frames)
+    abilityCDs: [0,0,0,0,0],
+    abilityMaxCDs: [30,90,0,0,120],
+    // Inventory
+    inventory: { potions:0, bombs:0, mana_pots:0, smoke_bombs:0, molotovs:0, mega_pots:0 },
+    // Passives
+    passives: { lifesteal:false, goldBoost:false, infMana:false, mpRegenBoost:false, spellPwr:0 },
+    mpRegen: cd.mpRegen,
+    mpRegenTimer: 0,
+    // Status
+    statusEffects: [],
+    blocking: false,
+    blockTimer: 0,
+    dodging: false,
+    dodgeTimer: 0,
+    manaShield: false,
+    manaShieldTimer: 0,
+    infManaTimer: 0,
+    // Map
+    map: dungeon.map,
+    enemies: dungeon.enemies,
+    rooms: dungeon.rooms,
+    // Camera
+    camX: 0, camY: 0,
+    // Exploration
+    explored: Array.from({length:DUNGEON_H},()=>new Uint8Array(DUNGEON_W)),
+    visible: Array.from({length:DUNGEON_H},()=>new Uint8Array(DUNGEON_W)),
+    // Shop ownership
+    owned: new Set(),
+    purchased: new Set(),
+    frame: 0,
+  };
+}
+
+// ── START GAME ──
+function startGame() {
+  document.getElementById('screen-title').classList.add('hidden');
+  G = createGame(selectedClass);
+  updateHUD();
+  showFloorBanner(G.floor);
+  loop();
+}
+
+// ── MAIN LOOP ──
+let lastTime = 0;
+function loop(ts=0) {
+  const dt = Math.min(ts - lastTime, 50);
+  lastTime = ts;
+  if(G) {
+    G.frame++;
+    updateGame(dt);
+    render();
+  }
+  requestAnimationFrame(loop);
+}
+
+// ── UPDATE ──
+function updateGame(dt) {
+  if(G.hp <= 0) { showDead(); return; }
+  handleMovement();
+  updateManaRegen();
+  updateStatusEffects();
+  updateEnemies();
+  updateProjectiles();
+  updateParticles();
+  updateCooldowns();
+  updateVisibility();
+  updateBurnTiles();
+  if(G.infManaTimer > 0) G.infManaTimer--;
+  if(G.infManaTimer === 0 && G.passives.infMana) G.passives.infMana = false;
+  updateHUD();
+}
+
+// ── MOVEMENT ──
+function handleMovement() {
+  if(G.moveTimer > 0) { G.moveTimer--; return; }
+  let dx=0, dy=0;
+  if(KEYS['ArrowLeft']||KEYS['KeyA']) dx=-1;
+  else if(KEYS['ArrowRight']||KEYS['KeyD']) dx=1;
+  else if(KEYS['ArrowUp']||KEYS['KeyW']) dy=-1;
+  else if(KEYS['ArrowDown']||KEYS['KeyS']) dy=1;
+  if(!dx&&!dy) return;
+  G.facing = {dx,dy};
+  const nx=G.px+dx, ny=G.py+dy;
+  if(nx<0||nx>=DUNGEON_W||ny<0||ny>=DUNGEON_H) return;
+  const tile = G.map[ny][nx];
+  if(tile===T.WALL) return;
+  // Check enemy collision
+  const enemy = G.enemies.find(e=>e.x===nx&&e.y===ny);
+  if(enemy) { meleeAttackEnemy(enemy); G.moveTimer = G.moveDelay; return; }
+  G.px=nx; G.py=ny;
+  G.moveTimer = G.moveDelay;
+}
+
+// ── INTERACT ──
+function handleInteract() {
+  if(!G) return;
+  const tile = G.map[G.py][G.px];
+  if(tile===T.STAIRS) {
+    descendFloor();
+  } else if(tile===T.CHEST) {
+    openChest();
+  }
+  // Adjacent interact
+  [{dx:0,dy:0},{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}].forEach(({dx,dy})=>{
+    const t = G.map[G.py+dy]?.[G.px+dx];
+    if(t===T.CHEST) openChest(G.px+dx,G.py+dy);
+  });
+}
+
+function openChest(cx,cy) {
+  const x = cx??G.px, y = cy??G.py;
+  if(G.map[y]?.[x]!==T.CHEST) return;
+  G.map[y][x]=T.FLOOR;
+  const mult = G.passives.goldBoost ? 1.25 : 1;
+  const g = Math.floor((10+Math.floor(Math.random()*20)*G.floor)*mult);
+  G.gold += g;
+  addMsg(`Chest! Found ⬡${g} gold.`,'gold');
+  for(let i=0;i<8;i++) addParticle((x+0.5)*TS,(y+0.5)*TS,'#f5a623',
+    (Math.random()-0.5)*0.15,(Math.random()-0.5)*0.15,40,3);
+  // Chance for item
+  if(Math.random()<0.3) {
+    const item = ['hp_pot','bomb','smoke_bomb'][Math.floor(Math.random()*3)];
+    giveConsumable(item);
+    addMsg(`Also found a ${SHOP_ITEMS[item]?.name||item}!`,'loot');
+  }
+  if(G.cls==='miner'&&G.passives.goldBoost) {
+    const bonus = Math.floor(g*0.5);
+    G.gold+=bonus;
+    addMsg(`Miner bonus: +⬡${bonus}`,'gold');
+  }
+}
+
+function descendFloor() {
+  G.floor++;
+  if(G.floor > 12) { showWin(); return; }
+  // Every 3 floors, show shop
+  if(G.floor % 3 === 1 && G.floor > 1) {
+    showShop();
+    return;
+  }
+  nextFloor();
+}
+
+function nextFloor() {
+  const d = genDungeon(G.floor);
+  G.map = d.map;
+  G.enemies = d.enemies;
+  G.rooms = d.rooms;
+  G.px = d.px; G.py = d.py;
+  G.explored = Array.from({length:DUNGEON_H},()=>new Uint8Array(DUNGEON_W));
+  G.visible  = Array.from({length:DUNGEON_H},()=>new Uint8Array(DUNGEON_W));
+  projectiles=[]; particles=[]; dmgNumbers=[]; burnTiles=[];
+  showFloorBanner(G.floor);
+  // Restore some HP between floors
+  const healAmt = Math.floor(G.maxHp * 0.15);
+  G.hp = Math.min(G.maxHp, G.hp + healAmt);
+  addMsg(`Descended to floor ${G.floor}. Healed ${healAmt} HP.`,'info');
+}
+
+// ── FLOOR BANNER ──
+function showFloorBanner(f) {
+  const el = document.getElementById('floor-banner');
+  el.textContent = `— FLOOR ${f} —`;
+  el.style.opacity='1';
+  setTimeout(()=>el.style.opacity='0',1800);
+}
+
+// ── ATTACK ──
+function triggerAttack() {
+  if(!G) return;
+  const {dx,dy} = G.facing;
+  const tx=G.px+dx, ty=G.py+dy;
+  const enemy = G.enemies.find(e=>e.x===tx&&e.y===ty);
+  if(enemy) { meleeAttackEnemy(enemy); return; }
+  // Range attack for mage
+  if(G.cls==='mage') useAbility(0);
+}
+
+function meleeAttackEnemy(enemy) {
+  if(G.abilityCDs[0]>0 && G.cls!=='mage') return;
+  let dmg = Math.max(1, G.atk - enemy.def + Math.floor(Math.random()*5));
+  // Weapon bonuses
+  if(G.passives.dualDagger && Math.random()<0.3) { dmg*=2; addMsg('Double hit!','loot'); }
+  if(G.passives.cleave) {
+    G.enemies.filter(e=>Math.abs(e.x-enemy.x)<=1&&Math.abs(e.y-enemy.y)<=1&&e!==enemy)
+      .forEach(e=>damageEnemy(e,Math.floor(dmg*0.5)));
+  }
+  damageEnemy(enemy, dmg);
+  // Lifesteal
+  if(G.passives.lifesteal) {
+    const heal = Math.floor(dmg*0.15);
+    G.hp = Math.min(G.maxHp, G.hp+heal);
+    addMsg(`Lifesteal +${heal}HP`,'heal');
+  }
+  // Poison blade
+  if(G.passives.poisonBlade) applyStatus(enemy,'poison',6);
+  G.abilityCDs[0] = G.abilityMaxCDs[0];
+}
+
+function damageEnemy(enemy, dmg) {
+  if(!dmg||dmg<=0) return;
+  enemy.hp -= dmg;
+  enemy.dmgFlash = 8;
+  enemy.vx = (Math.random()-0.5)*4;
+  enemy.vy = (Math.random()-0.5)*4;
+  spawnBlood((enemy.x+0.5)*TS,(enemy.y+0.5)*TS,enemy.color);
+  addDmgNumber((enemy.x+0.5)*TS,(enemy.y+0.5)*TS,`-${dmg}`,'#ff6b6b');
+  if(enemy.hp<=0) killEnemy(enemy);
+}
+
+function killEnemy(enemy) {
+  G.enemies = G.enemies.filter(e=>e.id!==enemy.id);
+  G.kills++;
+  const goldMult = G.passives.goldBoost ? 1.25 : 1;
+  const g = Math.floor((enemy.goldMin+Math.floor(Math.random()*(enemy.goldMax-enemy.goldMin)))*goldMult);
+  G.gold += g;
+  G.xp += enemy.xp;
+  addMsg(`Killed ${enemy.type}! +${enemy.xp}XP +⬡${g}`,'gold');
+  for(let i=0;i<12;i++) addParticle((enemy.x+0.5)*TS,(enemy.y+0.5)*TS,enemy.color,
+    (Math.random()-0.5)*0.18,(Math.random()-0.5)*0.18,35,3);
+  checkLevelUp();
+}
+
+function checkLevelUp() {
+  while(G.xp >= G.xpNext) {
+    G.xp -= G.xpNext;
+    G.level++;
+    G.xpNext = Math.floor(G.xpNext * 1.4);
+    G.maxHp += 10; G.hp = Math.min(G.maxHp, G.hp+10);
+    G.atk += 2; G.def += 1;
+    G.maxMp += 5; G.mp = Math.min(G.maxMp, G.mp+5);
+    addMsg(`LEVEL UP! Now Lv.${G.level}! +10HP +2ATK +1DEF`,'loot');
+  }
+}
+
+// ── ENEMY AI ──
+function updateEnemies() {
+  G.enemies.forEach(enemy => {
+    // Status ticks
+    enemy.statusEffects = enemy.statusEffects.filter(se => {
+      se.duration--;
+      if(se.type==='poison'&&G.frame%20===0) { damageEnemy(enemy,4); }
+      if(se.type==='burn'  &&G.frame%15===0) { damageEnemy(enemy,8); }
+      return se.duration>0;
+    });
+    if(enemy.dmgFlash>0) { enemy.dmgFlash--; enemy.vx*=0.7; enemy.vy*=0.7; }
+
+    // Move toward player
+    enemy.moveTimer++;
+    if(enemy.moveTimer < Math.max(12-enemy.spd*2,3)) return;
+    enemy.moveTimer=0;
+
+    const dist = Math.abs(enemy.x-G.px)+Math.abs(enemy.y-G.py);
+
+    // Ranged attack
+    if(enemy.ranged && dist<=6 && dist>1) {
+      if(enemy.attackTimer<=0) {
+        fireEnemyProjectile(enemy);
+        enemy.attackTimer=40;
+      }
+    }
+    if(enemy.attackTimer>0) enemy.attackTimer--;
+
+    if(dist>8) return; // Out of aggro range
+
+    // Simple pathfinding toward player
+    const mdx = G.px>enemy.x?1:G.px<enemy.x?-1:0;
+    const mdy = G.py>enemy.y?1:G.py<enemy.y?-1:0;
+    let moved = false;
+
+    // Try direct, then perpendicular
+    const tries = [[mdx,mdy],[mdx,0],[0,mdy]];
+    for(const [ex,ey] of tries) {
+      if(!ex&&!ey) continue;
+      const nx=enemy.x+ex, ny=enemy.y+ey;
+      if(nx<0||nx>=DUNGEON_W||ny<0||ny>=DUNGEON_H) continue;
+      if(G.map[ny][nx]!==T.FLOOR&&G.map[ny][nx]!==T.STAIRS) continue;
+      const occupied = G.enemies.some(e=>e!==enemy&&e.x===nx&&e.y===ny);
+      if(occupied) continue;
+      if(nx===G.px&&ny===G.py) {
+        // Attack player
+        let dmg = Math.max(1,enemy.atk-G.def+Math.floor(Math.random()*4));
+        if(G.blocking) { dmg=Math.floor(dmg*0.1); addMsg('Blocked!','info'); }
+        if(G.manaShield) {
+          const mpCost = Math.min(G.mp, dmg*2);
+          G.mp-=mpCost; dmg=Math.max(0,dmg-Math.floor(mpCost/2));
+        }
+        applyPlayerDamage(dmg, enemy);
+        if(enemy.lifesteal) enemy.hp=Math.min(enemy.maxHp,enemy.hp+Math.floor(dmg*0.3));
+        moved=true; break;
+      }
+      enemy.x=nx; enemy.y=ny; moved=true; break;
+    }
+  });
+}
+
+function fireEnemyProjectile(enemy) {
+  const dx=G.px-enemy.x, dy=G.py-enemy.y;
+  const len=Math.sqrt(dx*dx+dy*dy)||1;
+  projectiles.push({
+    x:(enemy.x+0.5)*TS, y:(enemy.y+0.5)*TS,
+    vx:dx/len*0.12, vy:dy/len*0.12,
+    dmg:Math.floor(enemy.atk*0.8), color:'#da77f2',
+    owner:'enemy', life:80, r:4
+  });
+}
+
+function applyPlayerDamage(dmg, source) {
+  if(dmg<=0) return;
+  G.hp -= dmg;
+  addMsg(`${source?.type||'Enemy'} hit you for ${dmg}!`,'dmg');
+  addDmgNumber(G.px*TS,G.py*TS,`-${dmg}`,'#ff4444');
+  spawnBlood((G.px+0.5)*TS,(G.py+0.5)*TS,'#c92a2a',4);
+}
+
+// ── ABILITIES ──
+function handleAbilityKey(code) {
+  if(!G) return;
+  const map = {'Digit1':0,'Digit2':1,'Digit3':2,'Digit4':3,'Digit5':4};
+  if(code in map) useAbility(map[code]);
+}
+
+function useAbility(slot) {
+  if(!G) return;
+  if(G.abilityCDs[slot]>0) { addMsg('Ability on cooldown!','warn'); return; }
+  const ab = G.clsData.abilities[slot];
+  switch(ab) {
+    // ─ WARRIOR ─
+    case 'slash':      doSlash();       break;
+    case 'block':      doBlock();       break;
+    case 'whirlwind':  doWhirlwind();   break;
+    // ─ ROGUE ─
+    case 'stab':       doStab();        break;
+    case 'dodge':      doDodge();       break;
+    case 'poison_cloud': doPoisonCloud(); break;
+    // ─ MAGE ─
+    case 'fireball':   doFireball();    break;
+    case 'ice_bolt':   doIceBolt();     break;
+    case 'arcane_burst':doArcaneBurst();break;
+    case 'mana_shield':doManaShield();  break;
+    // ─ MINER ─
+    case 'slam':       doSlam();        break;
+    case 'tunnel':     doTunnel();      break;
+    case 'seismic':    doSeismic();     break;
+    // ─ SHARED ─
+    case 'potion':     usePotionSlot(); break;
+    case 'bomb':       useBombSlot();   break;
+  }
+}
+
+// Warrior
+function doSlash() {
+  const targets = G.enemies.filter(e=>Math.abs(e.x-G.px)<=1&&Math.abs(e.y-G.py)<=1);
+  if(!targets.length) return;
+  targets.forEach(e=>{ damageEnemy(e,Math.floor(G.atk*1.5)); });
+  addMsg(`Slash! Hit ${targets.length} enemies.`,'info');
+  G.abilityCDs[0]=G.abilityMaxCDs[0];
+}
+function doBlock() {
+  G.blocking=true; G.blockTimer=60;
+  addMsg('Blocking! Damage reduced for 1s.','info');
+  G.abilityCDs[1]=G.abilityMaxCDs[1];
+}
+function doWhirlwind() {
+  const targets = G.enemies.filter(e=>Math.abs(e.x-G.px)<=2&&Math.abs(e.y-G.py)<=2);
+  targets.forEach(e=>{
+    damageEnemy(e,Math.floor(G.atk*1.2));
+    e.vx=(e.x-G.px)*3; e.vy=(e.y-G.py)*3;
+  });
+  for(let a=0;a<360;a+=20) addParticle((G.px+0.5)*TS,(G.py+0.5)*TS,'#74c0fc',
+    Math.cos(a*Math.PI/180)*0.12,Math.sin(a*Math.PI/180)*0.12,30,3);
+  addMsg(`Whirlwind! Hit ${targets.length} enemies.`,'loot');
+  G.abilityCDs[4]=G.abilityMaxCDs[4];
+}
+
+// Rogue
+function doStab() {
+  const {dx,dy}=G.facing;
+  const tx=G.px+dx,ty=G.py+dy;
+  const e=G.enemies.find(e=>e.x===tx&&e.y===ty);
+  if(!e){addMsg('No target!','warn');return;}
+  const dmg=Math.floor(G.atk*2.5);
+  damageEnemy(e,dmg);
+  addMsg(`Backstab! ${dmg} damage!`,'loot');
+  G.abilityCDs[0]=G.abilityMaxCDs[0];
+}
+function doDodge() {
+  G.dodging=true; G.dodgeTimer=45;
+  const {dx,dy}=G.facing;
+  for(let i=0;i<3;i++){
+    const nx=G.px+dx*i,ny=G.py+dy*i;
+    if(G.map[ny]?.[nx]===T.FLOOR){G.px=nx;G.py=ny;}
+  }
+  addMsg('Dodge!','info');
+  G.abilityCDs[1]=G.abilityMaxCDs[1];
+}
+function doPoisonCloud() {
+  G.enemies.filter(e=>Math.abs(e.x-G.px)<=3&&Math.abs(e.y-G.py)<=3)
+    .forEach(e=>{applyStatus(e,'poison',8);addMsg('Poisoned!','info');});
+  for(let i=0;i<20;i++) addParticle((G.px+0.5)*TS,(G.py+0.5)*TS,'#a9e34b',
+    (Math.random()-0.5)*0.15,(Math.random()-0.5)*0.15,40,4);
+  G.abilityCDs[4]=G.abilityMaxCDs[4];
+}
+
+// Mage
+function spendMana(cost) {
+  if(G.passives.infMana) return true;
+  if(G.mp<cost){addMsg('Not enough mana!','warn');return false;}
+  G.mp-=cost; return true;
+}
+function doFireball() {
+  if(!spendMana(20)) return;
+  const {dx,dy}=G.facing;
+  projectiles.push({
+    x:(G.px+0.5)*TS,y:(G.py+0.5)*TS,
+    vx:dx*0.18,vy:dy*0.18,
+    dmg:Math.floor((20+G.passives.spellPwr)*1.0),
+    color:'#ff6b6b',owner:'player',life:80,r:6,
+    aoe:3, type:'fire'
+  });
+  addMsg('Fireball!','info');
+  G.abilityCDs[0]=G.abilityMaxCDs[0];
+}
+function doIceBolt() {
+  if(!spendMana(15)) return;
+  const {dx,dy}=G.facing;
+  projectiles.push({
+    x:(G.px+0.5)*TS,y:(G.py+0.5)*TS,
+    vx:dx*0.22,vy:dy*0.22,
+    dmg:Math.floor(15+G.passives.spellPwr),
+    color:'#74c0fc',owner:'player',life:100,r:5,
+    slow:true, type:'ice'
+  });
+  addMsg('Ice Bolt!','info');
+  G.abilityCDs[0]=G.abilityMaxCDs[0];
+}
+function doArcaneBurst() {
+  if(!spendMana(35)) return;
+  const targets=G.enemies.filter(e=>Math.abs(e.x-G.px)<=4&&Math.abs(e.y-G.py)<=4);
+  targets.forEach(e=>{
+    const dmg=Math.floor(25+G.passives.spellPwr+(Math.random()*10));
+    damageEnemy(e,dmg);
+  });
+  for(let a=0;a<360;a+=15) addParticle((G.px+0.5)*TS,(G.py+0.5)*TS,'#da77f2',
+    Math.cos(a*Math.PI/180)*0.14,Math.sin(a*Math.PI/180)*0.14,40,4);
+  addMsg(`Arcane Burst! Hit ${targets.length} enemies.`,'loot');
+  G.abilityCDs[4]=G.abilityMaxCDs[4];
+}
+function doManaShield() {
+  if(G.mp<25){addMsg('Not enough mana!','warn');return;}
+  G.mp-=25; G.manaShield=true; G.manaShieldTimer=180;
+  addMsg('Mana Shield active! MP absorbs damage.','info');
+  G.abilityCDs[1]=G.abilityMaxCDs[1];
+}
+
+// Miner
+function doSlam() {
+  const targets=G.enemies.filter(e=>Math.abs(e.x-G.px)<=1&&Math.abs(e.y-G.py)<=1);
+  targets.forEach(e=>{
+    damageEnemy(e,Math.floor(G.atk*1.8));
+    applyStatus(e,'stun',2);
+  });
+  for(let i=0;i<16;i++) addParticle((G.px+0.5)*TS,(G.py+0.5)*TS,'#868e96',
+    (Math.random()-0.5)*0.2,(Math.random()-0.5)*0.2-0.05,30,3);
+  addMsg(`Slam! Hit ${targets.length} targets.`,'info');
+  G.abilityCDs[0]=G.abilityMaxCDs[0];
+}
+function doTunnel() {
+  const {dx,dy}=G.facing;
+  for(let i=1;i<=3;i++){
+    const nx=G.px+dx*i,ny=G.py+dy*i;
+    if(ny>=0&&ny<DUNGEON_H&&nx>=0&&nx<DUNGEON_W) {
+      if(G.map[ny][nx]===T.WALL) G.map[ny][nx]=T.FLOOR;
+    }
+  }
+  addMsg('Tunnelled through wall!','info');
+  G.abilityCDs[1]=G.abilityMaxCDs[1];
+}
+function doSeismic() {
+  const targets=G.enemies.filter(e=>Math.abs(e.x-G.px)<=5&&Math.abs(e.y-G.py)<=5);
+  targets.forEach(e=>{
+    damageEnemy(e,Math.floor(G.atk*1.0));
+    applyStatus(e,'stun',3);
+    e.vx=(e.x-G.px)*2;e.vy=(e.y-G.py)*2;
+  });
+  for(let i=0;i<30;i++) addParticle((G.px+0.5)*TS,(G.py+0.5)*TS,'#a9e34b',
+    (Math.random()-0.5)*0.25,(Math.random()-0.5)*0.25,50,3);
+  addMsg(`Seismic Wave! Hit ${targets.length} enemies.`,'loot');
+  G.abilityCDs[4]=G.abilityMaxCDs[4];
+}
+
+// Consumables
+function usePotionSlot() {
+  if(G.inventory.mega_pots>0){
+    G.inventory.mega_pots--;
+    G.hp=Math.min(G.maxHp,G.hp+80);
+    G.mp=Math.min(G.maxMp,G.mp+20);
+    addMsg('Mega Potion! +80HP +20MP','heal');
+  } else if(G.inventory.potions>0){
+    G.inventory.potions--;
+    G.hp=Math.min(G.maxHp,G.hp+40);
+    addMsg('Health Potion! +40HP','heal');
+  } else { addMsg('No potions!','warn'); }
+}
+function useBombSlot() {
+  if(G.inventory.smoke_bombs>0){
+    G.inventory.smoke_bombs--;
+    G.enemies.filter(e=>Math.abs(e.x-G.px)<=4&&Math.abs(e.y-G.py)<=4)
+      .forEach(e=>applyStatus(e,'blind',6));
+    for(let i=0;i<20;i++) addParticle((G.px+0.5)*TS,(G.py+0.5)*TS,'#868e96',
+      (Math.random()-0.5)*0.2,(Math.random()-0.5)*0.2,50,4);
+    addMsg('Smoke Bomb! Enemies blinded.','info');
+  } else if(G.inventory.molotovs>0){
+    G.inventory.molotovs--;
+    G.enemies.filter(e=>Math.abs(e.x-G.px)<=4&&Math.abs(e.y-G.py)<=4)
+      .forEach(e=>applyStatus(e,'burn',10));
+    burnTiles.push({x:G.px,y:G.py,timer:80});
+    addMsg('Molotov! Area on fire!','dmg');
+  } else if(G.inventory.bombs>0){
+    G.inventory.bombs--;
+    G.enemies.filter(e=>Math.abs(e.x-G.px)<=3&&Math.abs(e.y-G.py)<=3)
+      .forEach(e=>damageEnemy(e,30));
+    for(let a=0;a<360;a+=10) addParticle((G.px+0.5)*TS,(G.py+0.5)*TS,'#ff922b',
+      Math.cos(a*Math.PI/180)*0.2,Math.sin(a*Math.PI/180)*0.2,35,4);
+    addMsg('BOOM! 30 AoE damage in 3-tile radius.','dmg');
+  } else { addMsg('No bombs/special items!','warn'); }
+}
+function giveConsumable(key) {
+  if(key==='hp_pot') G.inventory.potions++;
+  if(key==='mega_pot') G.inventory.mega_pots++;
+  if(key==='mp_pot') G.inventory.mana_pots++;
+  if(key==='bomb') G.inventory.bombs++;
+  if(key==='smoke') G.inventory.smoke_bombs++;
+  if(key==='molotov') G.inventory.molotovs++;
+}
+
+// ── STATUS EFFECTS ──
+function applyStatus(entity, type, duration) {
+  const existing = entity.statusEffects.find(s=>s.type===type);
+  if(existing) existing.duration=Math.max(existing.duration,duration*20);
+  else entity.statusEffects.push({type,duration:duration*20});
+}
+function updateStatusEffects() {
+  G.statusEffects = G.statusEffects.filter(se=>{
+    se.duration--;
+    if(se.type==='regen'&&G.frame%30===0){G.hp=Math.min(G.maxHp,G.hp+3);}
+    return se.duration>0;
+  });
+  if(G.blockTimer>0){G.blockTimer--;if(G.blockTimer<=0)G.blocking=false;}
+  if(G.dodgeTimer>0){G.dodgeTimer--;if(G.dodgeTimer<=0)G.dodging=false;}
+  if(G.manaShieldTimer>0){G.manaShieldTimer--;if(G.manaShieldTimer<=0)G.manaShield=false;}
+}
+
+// ── MANA REGEN ──
+function updateManaRegen() {
+  G.mpRegenTimer++;
+  const rate = G.passives.mpRegenBoost ? G.mpRegen*3 : G.mpRegen;
+  if(G.mpRegenTimer >= Math.max(1,30/rate)) {
+    G.mp = Math.min(G.maxMp, G.mp+1);
+    G.mpRegenTimer=0;
+  }
+}
+
+// ── PROJECTILES ──
+function updateProjectiles() {
+  projectiles = projectiles.filter(p=>{
+    p.x+=p.vx*TS; p.y+=p.vy*TS;
+    p.life--;
+    const tx=Math.floor(p.x/TS), ty=Math.floor(p.y/TS);
+    if(tx<0||tx>=DUNGEON_W||ty<0||ty>=DUNGEON_H) return false;
+    if(G.map[ty]?.[tx]===T.WALL) {
+      spawnBlood(p.x,p.y,p.color,4); return false;
+    }
+    // Player projectiles hit enemies
+    if(p.owner==='player') {
+      const hit = G.enemies.find(e=>Math.abs(e.x*TS+TS/2-p.x)<TS*0.7&&Math.abs(e.y*TS+TS/2-p.y)<TS*0.7);
+      if(hit){
+        damageEnemy(hit,p.dmg);
+        if(p.slow) applyStatus(hit,'slow',3);
+        if(p.type==='fire') applyStatus(hit,'burn',4);
+        if(p.aoe) {
+          G.enemies.filter(e=>e!==hit&&Math.abs(e.x-hit.x)<=p.aoe&&Math.abs(e.y-hit.y)<=p.aoe)
+            .forEach(e=>damageEnemy(e,Math.floor(p.dmg*0.5)));
+          for(let a=0;a<360;a+=15) addParticle(p.x,p.y,p.color,
+            Math.cos(a*Math.PI/180)*0.1,Math.sin(a*Math.PI/180)*0.1,25,3);
+        }
+        spawnBlood(p.x,p.y,p.color,6);
+        return false;
+      }
+    }
+    // Enemy projectiles hit player
+    if(p.owner==='enemy') {
+      if(Math.abs(G.px*TS+TS/2-p.x)<TS*0.7&&Math.abs(G.py*TS+TS/2-p.y)<TS*0.7){
+        let dmg=p.dmg;
+        if(G.dodging) dmg=0;
+        applyPlayerDamage(dmg,{type:'Projectile'});
+        spawnBlood(p.x,p.y,'#c92a2a',4);
+        return false;
+      }
+    }
+    // Trail
+    if(Math.random()<0.4) addParticle(p.x,p.y,p.color,0,0,8,2);
+    return p.life>0;
+  });
+}
+
+// ── PARTICLES ──
+function updateParticles() {
+  particles = particles.filter(p=>{
+    p.x+=p.vx*TS; p.y+=p.vy*TS;
+    p.vy+=0.003; p.life--;
+    return p.life>0;
+  });
+  dmgNumbers = dmgNumbers.filter(n=>{
+    n.wy+=n.vy*TS; n.life--;
+    return n.life>0;
+  });
+}
+
+// ── BURN TILES ──
+function updateBurnTiles() {
+  burnTiles = burnTiles.filter(b=>{
+    b.timer--;
+    if(G.frame%10===0) {
+      G.enemies.filter(e=>Math.abs(e.x-b.x)<=2&&Math.abs(e.y-b.y)<=2)
+        .forEach(e=>damageEnemy(e,8));
+    }
+    return b.timer>0;
+  });
+}
+
+// ── COOLDOWNS ──
+function updateCooldowns() {
+  for(let i=0;i<5;i++) if(G.abilityCDs[i]>0) G.abilityCDs[i]--;
+}
+
+// ── VISIBILITY (FOV) ──
+function updateVisibility() {
+  G.visible = Array.from({length:DUNGEON_H},()=>new Uint8Array(DUNGEON_W));
+  const R=6;
+  for(let dy=-R;dy<=R;dy++) for(let dx=-R;dx<=R;dx++) {
+    if(dx*dx+dy*dy>R*R) continue;
+    const tx=G.px+dx, ty=G.py+dy;
+    if(tx<0||tx>=DUNGEON_W||ty<0||ty>=DUNGEON_H) continue;
+    // Simple ray cast
+    let clear=true;
+    const steps=Math.max(Math.abs(dx),Math.abs(dy))*2;
+    for(let s=1;s<steps;s++) {
+      const rx=Math.round(G.px+dx*s/steps), ry=Math.round(G.py+dy*s/steps);
+      if(G.map[ry]?.[rx]===T.WALL){clear=false;break;}
+    }
+    if(clear||G.map[ty][tx]===T.WALL){G.visible[ty][tx]=1;G.explored[ty][tx]=1;}
+  }
+}
+
+// ── CAMERA ──
+function updateCamera() {
+  const targetX = G.px*TS + TS/2 - C.width/2;
+  const targetY = G.py*TS + TS/2 - C.height/2;
+  G.camX += (targetX - G.camX)*0.12;
+  G.camY += (targetY - G.camY)*0.12;
+}
+
+// ── RENDER ──
+function render() {
+  CTX.clearRect(0,0,C.width,C.height);
+  if(!G) return;
+  updateCamera();
+  CTX.save();
+  CTX.translate(-G.camX,-G.camY);
+
+  // Draw tiles
+  const startX=Math.max(0,Math.floor(G.camX/TS)-1);
+  const endX=Math.min(DUNGEON_W,Math.ceil((G.camX+C.width)/TS)+1);
+  const startY=Math.max(0,Math.floor(G.camY/TS)-1);
+  const endY=Math.min(DUNGEON_H,Math.ceil((G.camY+C.height)/TS)+1);
+
+  for(let y=startY;y<endY;y++) for(let x=startX;x<endX;x++) {
+    const vis=G.visible[y][x], exp=G.explored[y][x];
+    if(!exp) continue;
+    const t=G.map[y][x];
+    const px=x*TS, py=y*TS;
+    const alpha = vis ? 1 : 0.35;
+    CTX.globalAlpha=alpha;
+    drawTile(CTX,t,px,py,x,y);
+  }
+  CTX.globalAlpha=1;
+
+  // Burn tiles
+  burnTiles.forEach(b=>{
+    if(!G.visible[b.y]?.[b.x]) return;
+    CTX.globalAlpha=0.5+Math.sin(G.frame*0.2)*0.2;
+    CTX.fillStyle='#ff922b';
+    CTX.fillRect(b.x*TS+2,b.y*TS+2,TS-4,TS-4);
+  });
+  CTX.globalAlpha=1;
+
+  // Enemies
+  G.enemies.forEach(enemy=>{
+    if(!G.visible[enemy.y]?.[enemy.x]) return;
+    drawEnemy(CTX,enemy);
+  });
+
+  // Projectiles
+  projectiles.forEach(p=>{
+    CTX.beginPath();
+    CTX.arc(p.x,p.y,p.r,0,Math.PI*2);
+    CTX.fillStyle=p.color;
+    CTX.fill();
+    // Glow
+    CTX.shadowBlur=10; CTX.shadowColor=p.color;
+    CTX.fill(); CTX.shadowBlur=0;
+  });
+
+  // Particles
+  particles.forEach(p=>{
+    const a=p.life/p.maxLife;
+    CTX.globalAlpha=a;
+    CTX.fillStyle=p.color;
+    CTX.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size);
+  });
+  CTX.globalAlpha=1;
+
+  // Player
+  drawPlayer(CTX);
+
+  // Damage numbers
+  dmgNumbers.forEach(n=>{
+    const a=n.life/50;
+    CTX.globalAlpha=a;
+    CTX.font='bold 12px Courier New';
+    CTX.fillStyle=n.color;
+    CTX.textAlign='center';
+    CTX.fillText(n.text,n.wx,n.wy);
+  });
+  CTX.globalAlpha=1;
+
+  CTX.restore();
+}
+
+// ── DRAW TILE ──
+function drawTile(ctx,t,px,py,x,y) {
+  switch(t) {
+    case T.FLOOR:
+      ctx.fillStyle='#141420';
+      ctx.fillRect(px,py,TS,TS);
+      // Subtle grid
+      ctx.strokeStyle='#1a1a2c';
+      ctx.lineWidth=0.5;
+      ctx.strokeRect(px+0.5,py+0.5,TS-1,TS-1);
+      break;
+    case T.WALL:
+      ctx.fillStyle='#1e1e30';
+      ctx.fillRect(px,py,TS,TS);
+      ctx.fillStyle='#2a2a42';
+      ctx.fillRect(px,py,TS,3);
+      ctx.fillStyle='#12121e';
+      ctx.fillRect(px,py+TS-2,TS,2);
+      break;
+    case T.STAIRS:
+      ctx.fillStyle='#141420';
+      ctx.fillRect(px,py,TS,TS);
+      ctx.fillStyle='#2a4a2a';
+      ctx.fillRect(px+2,py+2,TS-4,TS-4);
+      ctx.fillStyle='#69db7c';
+      ctx.font=`${TS-6}px serif`;
+      ctx.textAlign='center';
+      ctx.fillText('▼',px+TS/2,py+TS-4);
+      break;
+    case T.CHEST:
+      ctx.fillStyle='#141420';
+      ctx.fillRect(px,py,TS,TS);
+      ctx.fillStyle='#4a3a00';
+      ctx.fillRect(px+3,py+6,TS-6,TS-10);
+      ctx.fillStyle='#f5a623';
+      ctx.fillRect(px+3,py+6,TS-6,4);
+      ctx.fillStyle='#f0c060';
+      ctx.fillRect(px+TS/2-2,py+9,4,4);
+      break;
+    case T.VOID:
+      ctx.fillStyle='#050508';
+      ctx.fillRect(px,py,TS,TS);
+      break;
+  }
+}
+
+// ── DRAW ENEMY ──
+function drawEnemy(ctx,enemy) {
+  const px=(enemy.x+0.5)*TS + (enemy.dmgFlash?enemy.vx:0);
+  const py=(enemy.y+0.5)*TS + (enemy.dmgFlash?enemy.vy:0);
+  const s=TS*enemy.size*0.7;
+
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,0.3)';
+  ctx.ellipse(px,enemy.y*TS+TS-2,s*0.5,3,0,0,Math.PI*2);
+  ctx.fill();
+
+  // Body flash
+  if(enemy.dmgFlash>0) { ctx.save(); ctx.filter='brightness(2)'; }
+
+  // Draw pixel body
+  ctx.fillStyle=enemy.color;
+  ctx.fillRect(px-s/2,py-s/2,s,s);
+
+  // Face
+  ctx.fillStyle='rgba(0,0,0,0.7)';
+  ctx.fillRect(px-s*0.25,py-s*0.15,s*0.18,s*0.18); // left eye
+  ctx.fillRect(px+s*0.08,py-s*0.15,s*0.18,s*0.18); // right eye
+  ctx.fillRect(px-s*0.2,py+s*0.1,s*0.4,s*0.1);      // mouth
+
+  if(enemy.dmgFlash>0) ctx.restore();
+
+  // HP bar
+  const hpW=s*1.2, hpH=3;
+  ctx.fillStyle='#2a0000';
+  ctx.fillRect(px-hpW/2,py-s/2-7,hpW,hpH);
+  ctx.fillStyle='#e53935';
+  ctx.fillRect(px-hpW/2,py-s/2-7,hpW*(enemy.hp/enemy.maxHp),hpH);
+
+  // Status icons
+  let si=0;
+  enemy.statusEffects.forEach(se=>{
+    const icons={poison:'☠',burn:'🔥',slow:'❄',blind:'👁',stun:'⭐'};
+    ctx.font='8px serif';
+    ctx.textAlign='left';
+    ctx.fillStyle='#fff';
+    ctx.fillText(icons[se.type]||'!',px-s/2+si*10,py-s/2-10);
+    si++;
+  });
+
+  // Boss indicator
+  if(enemy.boss) {
+    ctx.strokeStyle='#f5a623';
+    ctx.lineWidth=2;
+    ctx.strokeRect(px-s/2-2,py-s/2-2,s+4,s+4);
+  }
+}
+
+// ── DRAW PLAYER ──
+function drawPlayer(ctx) {
+  const px=(G.px+0.5)*TS, py=(G.py+0.5)*TS;
+  const s=TS*0.75;
+  const cls = G.clsData;
+
+  // Glow
+  ctx.save();
+  ctx.shadowBlur=12; ctx.shadowColor=cls.color;
+
+  // Body
+  ctx.fillStyle=cls.color;
+  ctx.fillRect(px-s/2,py-s/2,s,s);
+
+  ctx.restore();
+
+  // Face
+  ctx.fillStyle='rgba(255,255,255,0.8)';
+  ctx.fillRect(px-s*0.22,py-s*0.15,s*0.16,s*0.16);
+  ctx.fillRect(px+s*0.06,py-s*0.15,s*0.16,s*0.16);
+
+  // Weapon indicator
+  ctx.font=`${TS*0.55}px serif`;
+  ctx.textAlign='center';
+  const wOff={dx:G.facing.dx,dy:G.facing.dy};
+  ctx.fillText(cls.weaponIcon,px+wOff.dx*(s*0.8),py+wOff.dy*(s*0.8)+4);
+
+  // Block/dodge/mana shield aura
+  if(G.blocking){
+    ctx.strokeStyle='#74c0fc'; ctx.lineWidth=2;
+    ctx.strokeRect(px-s/2-3,py-s/2-3,s+6,s+6);
+  }
+  if(G.manaShield){
+    ctx.strokeStyle='#da77f2'; ctx.lineWidth=2;
+    ctx.strokeRect(px-s/2-4,py-s/2-4,s+8,s+8);
+  }
+  if(G.dodging){
+    ctx.globalAlpha=0.5;
+    ctx.strokeStyle='#868e96'; ctx.lineWidth=1;
+    ctx.strokeRect(px-s/2-2,py-s/2-2,s+4,s+4);
+    ctx.globalAlpha=1;
+  }
+}
+
+// ── HUD UPDATE ──
+function updateHUD() {
+  if(!G) return;
+  document.getElementById('hud-class').textContent=G.clsData.name;
+  document.getElementById('hp-fill').style.width=`${(G.hp/G.maxHp)*100}%`;
+  document.getElementById('hp-val').textContent=`${G.hp}/${G.maxHp}`;
+  document.getElementById('mp-fill').style.width=`${(G.mp/G.maxMp)*100}%`;
+  document.getElementById('mp-val').textContent=`${G.mp}/${G.maxMp}`;
+  document.getElementById('xp-fill').style.width=`${(G.xp/G.xpNext)*100}%`;
+  document.getElementById('xp-val').textContent=`Lv.${G.level}`;
+  document.getElementById('stat-atk').textContent=G.atk;
+  document.getElementById('stat-def').textContent=G.def;
+  document.getElementById('stat-spd').textContent=G.spd;
+  document.getElementById('stat-wpn').textContent=G.weapon;
+  document.getElementById('hud-gold-val').textContent=G.gold;
+  document.getElementById('hud-floor').textContent=G.floor;
+  document.getElementById('hud-kills').textContent=G.kills;
+
+  // Ability icons
+  G.clsData.abilityIcons.forEach((icon,i)=>{
+    const el=document.getElementById(`slot-${i}-icon`);
+    if(el) el.textContent=icon;
+  });
+
+  // Cooldown display
+  for(let i=0;i<5;i++){
+    const cd=document.getElementById(`slot-${i}-cd`);
+    if(!cd) continue;
+    if(i===2){cd.textContent=G.inventory.potions+G.inventory.mega_pots||'';}
+    else if(i===3){cd.textContent=G.inventory.bombs+G.inventory.smoke_bombs+G.inventory.molotovs||'';}
+    else{cd.textContent=G.abilityCDs[i]>0?Math.ceil(G.abilityCDs[i]/60)+'s':'';}
+    const slot=document.getElementById(`slot-${i}`);
+    if(slot) slot.classList.toggle('active',G.abilityCDs[i]===0);
+  }
+}
+
+// ── MESSAGE LOG ──
+const msgs=[];
+function addMsg(text,type='info'){
+  const el=document.createElement('div');
+  el.className=`msg ${type}`;
+  el.textContent=text;
+  document.getElementById('msglog').prepend(el);
+  msgs.push(el);
+  setTimeout(()=>{el.classList.add('fade');setTimeout(()=>el.remove(),2000);},3000);
+  if(msgs.length>8) msgs.shift()?.remove();
+}
+
+// ── SHOP ──
+function showShop() {
+  document.getElementById('shop-gold-disp').textContent=G.gold;
+  const content=document.getElementById('shop-content');
+  content.innerHTML='';
+
+  // Build sections
+  const sections={
+    'WEAPONS & UPGRADES': Object.entries(SHOP_ITEMS).filter(([,i])=>i.type==='weapon'),
+    'POTIONS & BOMBS':    Object.entries(SHOP_ITEMS).filter(([,i])=>i.type==='consumable'),
+    'PASSIVE UPGRADES':   Object.entries(SHOP_ITEMS).filter(([,i])=>i.type==='passive'),
+  };
+
+  for(const [sTitle,items] of Object.entries(sections)){
+    const heading=document.createElement('div');
+    heading.className='shop-section';
+    heading.textContent=sTitle;
+    content.appendChild(heading);
+    const grid=document.createElement('div');
+    grid.className='shop-grid';
+
+    items.forEach(([key,item])=>{
+      // Class filter
+      if(item.classes&&!item.classes.includes(G.cls)) return;
+      const owned=G.owned.has(key);
+      const cantAfford=G.gold<item.price;
+      const el=document.createElement('div');
+      el.className='shop-item'+(cantAfford?' cant-afford':'')+(owned?' owned':'');
+      el.innerHTML=`
+        <div class="si-icon">${item.icon}</div>
+        <div class="si-tag ${item.tag}">${item.tag.toUpperCase()}</div>
+        <div class="si-name">${item.name}</div>
+        <div class="si-desc">${item.desc}</div>
+        <div class="si-price">${owned?'✓ OWNED':'⬡ '+item.price}</div>
+      `;
+      if(!owned&&!cantAfford) el.onclick=()=>buyItem(key,item);
+      grid.appendChild(el);
+    });
+    content.appendChild(grid);
+  }
+  document.getElementById('screen-shop').classList.remove('hidden');
+}
+
+function buyItem(key,item) {
+  if(G.gold<item.price) return;
+  G.gold-=item.price;
+  document.getElementById('shop-gold-disp').textContent=G.gold;
+  applyShopEffect(key,item);
+  if(item.type!=='consumable') G.owned.add(key);
+  addMsg(`Bought ${item.name}!`,'loot');
+  showShop(); // Refresh
+}
+
+function applyShopEffect(key,item) {
+  switch(item.effect){
+    // Weapons
+    case 'weapon_gs': G.atk+=15; G.weapon='Greatsword'; G.weaponIcon='🗡️'; G.clsData.weaponIcon='🗡️'; G.passives.cleave=true; break;
+    case 'weapon_dd': G.atk+=10; G.weapon='Dual Daggers'; G.weaponIcon='🔪'; G.clsData.weaponIcon='🔪'; G.passives.dualDagger=true; break;
+    case 'weapon_pb': G.atk+=8;  G.weapon='Poison Blade'; G.weaponIcon='🗡️'; G.passives.poisonBlade=true; break;
+    case 'weapon_ms': G.passives.spellPwr+=12; G.weapon='Arcane Staff'; G.weaponIcon='🪄'; G.clsData.weaponIcon='🪄'; G.abilityMaxCDs[0]=Math.max(20,G.abilityMaxCDs[0]-20); break;
+    case 'weapon_is': G.passives.spellPwr+=10; G.weapon='Frost Staff'; G.weaponIcon='🌊'; G.clsData.weaponIcon='🌊'; break;
+    case 'weapon_dp': G.atk+=12; G.weapon='Diamond Pick'; G.weaponIcon='💎'; G.clsData.weaponIcon='💎'; G.passives.goldBoost=true; break;
+    // Consumables
+    case 'hp_pot':    G.inventory.potions++;  break;
+    case 'mega_pot':  G.inventory.mega_pots++; break;
+    case 'mp_pot':    G.mp=Math.min(G.maxMp,G.mp+50); break;
+    case 'bomb':      G.inventory.bombs++;     break;
+    case 'smoke':     G.inventory.smoke_bombs++; break;
+    case 'molotov':   G.inventory.molotovs++;  break;
+    // Passives
+    case 'hp_up':     G.maxHp+=30; G.hp=Math.min(G.maxHp,G.hp+30); break;
+    case 'atk_up':    G.atk+=5; break;
+    case 'def_up':    G.def+=3; break;
+    case 'spd_up':    G.spd+=2; G.moveDelay=Math.max(1,G.moveDelay-2); break;
+    case 'mp_up':     G.maxMp+=40; G.mpRegen*=2; break;
+    case 'inf_mana':  G.passives.infMana=true; G.infManaTimer=3600; addMsg('INFINITE MANA for 1 floor!','loot'); break;
+    case 'gold_boost':G.passives.goldBoost=true; break;
+    case 'lifesteal': G.passives.lifesteal=true; break;
+    case 'mp_regen_boost': G.passives.mpRegenBoost=true; G.mpRegen*=3; break;
+  }
+}
+
+function leaveShop() {
+  document.getElementById('screen-shop').classList.add('hidden');
+  nextFloor();
+}
+
+// ── DEATH / WIN ──
+function showDead() {
+  if(document.getElementById('screen-dead').classList.contains('hidden')===false) return;
+  document.getElementById('dead-stats').innerHTML=
+    `Floor reached: ${G.floor}<br>Enemies killed: ${G.kills}<br>Gold collected: ${G.gold}<br>Level: ${G.level}`;
+  document.getElementById('screen-dead').classList.remove('hidden');
+  G=null;
+}
+function showWin() {
+  document.getElementById('win-stats').innerHTML=
+    `All 12 floors conquered!<br>Enemies killed: ${G.kills}<br>Gold collected: ${G.gold}<br>Level: ${G.level}`;
+  document.getElementById('screen-win').classList.remove('hidden');
+  G=null;
+}
+</script>
+</body>
+</html>
