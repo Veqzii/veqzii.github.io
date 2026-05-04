@@ -43,7 +43,7 @@ A fully browser-playable roguelike dungeon crawler built from scratch in vanilla
 ---
 
 ### Rock · Paper · Scissors
-> *C++ · SDL2 · SDL2_ttf*
+> * · SDL2 · SDL2_ttf*
 
 A polished 2D arcade game built entirely with SDL2 rendering primitives — no sprite sheets or external assets. All hand shapes are drawn programmatically.
 
@@ -56,7 +56,7 @@ A polished 2D arcade game built entirely with SDL2 rendering primitives — no s
 
 **Build:**
 ```bash
-g++ rps_game.cpp -o rps_game $(sdl2-config --cflags --libs) -lSDL2_ttf -std=c++17
+g++ rps_game.cpp -o rps_game $(sdl2-config --cflags --libs) -lSDL2_ttf -std=c++
 ```
 
 ---
@@ -87,7 +87,7 @@ All artwork created as original pieces to accompany game projects.
 
 | Area | Technologies |
 |------|-------------|
-| Game Dev | C++17, SDL2, SDL2_ttf, HTML5 Canvas, JavaScript |
+| Game Dev | C++, SDL2, SDL2_ttf, HTML5 Canvas, JavaScript |
 | Design | Figma, Capcut |
 | Web | HTML5, CSS3, JavaScript |
 | Version Control | Git, GitHub |
@@ -117,7 +117,7 @@ cd veqzii.github.io
 # Ubuntu:  sudo apt install libsdl2-dev libsdl2-ttf-dev
 # macOS:   brew install sdl2 sdl2_ttf
 
-g++ rps_game.cpp -o rps_game $(sdl2-config --cflags --libs) -lSDL2_ttf -std=c++17
+g++ rps_game.cpp -o rps_game $(sdl2-config --cflags --libs) -lSDL2_ttf -std=c++
 ./rps_game
 ```
 
