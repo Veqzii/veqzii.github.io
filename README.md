@@ -1,6 +1,6 @@
 # 🏰 veqzii.github.io — Portfolio
 
-> **Game Designer · Developer · Digital Artist**
+> **Game Designer · Developer ·**
 > A personal portfolio showcasing game projects, artwork, design documents and career experience.
 
 🌐 **[View Live Site →](https://veqzii.github.io)**
@@ -21,7 +21,7 @@
 
 ## 👤 About
 
-BSc Computer Games Technology graduate from the University of West London with a passion for game design, digital art and interactive experiences. This portfolio covers everything from C++ SDL2 games and roguelikes to design documents, concept art and career history.
+BSc Computer Games Technology graduate from the University of West London with a passion for game design and interactive experiences. This portfolio covers everything from C++ SDL2 games and roguelikes to design documents, concept art and career history.
 
 ---
 
