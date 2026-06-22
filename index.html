@@ -249,7 +249,13 @@
     </div>
   </section>
 
-<!-- ░░ CAREER ░░ -->
+Here are the two issues I can see in your code:
+
+Uni is duplicated — there are two tl-item blocks for "BSc Computer Games Technology 2019–2023", and the second one also has an unclosed <div> from the first entry.
+Skills panel — the closing tags for the career layout are mismatched due to the duplication, which breaks the flex layout and pushes the skills panel out of place.
+
+Here's the corrected Career section HTML — replace everything from <!-- ░░ CAREER ░░ --> to the closing </section>:
+html<!-- ░░ CAREER ░░ -->
 <section class="section section--dark" id="career">
   <div class="container">
     <div class="section-header">
@@ -260,6 +266,7 @@
 
     <div class="career-layout">
       <div class="timeline">
+
         <div class="tl-item reveal-up">
           <div class="tl-dot"></div>
           <div class="tl-content">
@@ -270,7 +277,7 @@
                                ● Managed all logistics, planning, and budgeting throughout the trip entirely on my own, reinforcing practical
                                  self-sufficiency and a calm approach to navigating unfamiliar situations.<br>
                                ● Returned in 2026 focused, well-rested, and committed to building a long-term career in marketing rather than
-                                 rushing into the wrong role straight out of university.<br>
+                                 rushing into the wrong role straight out of university.</p>
             <div class="tl-tags">
               <span class="tag">Travelling</span>
               <span class="tag">Culture</span>
@@ -281,7 +288,7 @@
           </div>
         </div>
 
-                <div class="tl-item reveal-up">
+        <div class="tl-item reveal-up">
           <div class="tl-dot"></div>
           <div class="tl-content">
             <span class="tl-date">2019 — 2023</span>
@@ -302,7 +309,9 @@
               <span class="tag">C++</span>
               <span class="tag">Game Design</span>
             </div>
-  
+          </div>
+        </div>
+
         <div class="tl-item reveal-up">
           <div class="tl-dot"></div>
           <div class="tl-content">
@@ -321,37 +330,13 @@
                                ● Coordinated with streamers and content creators simultaneously, keeping multiple sponsor and content
                                  commitments moving at once and ensuring nothing slipped through.<br>
                                ● Worked largely unsupervised in a fast-moving environment where staying organised, meeting sponsor
-                                 expectations, and hitting deadlines was entirely down to me.<br> </p>
+                                 expectations, and hitting deadlines was entirely down to me.</p>
             <div class="tl-tags">
               <span class="tag">Capcut</span>
               <span class="tag">Figma</span>
               <span class="tag">Social Media Managing</span>
               <span class="tag">SEO</span>
               <span class="tag">Communication</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tl-item reveal-up">
-          <div class="tl-dot"></div>
-          <div class="tl-content">
-            <span class="tl-date">2019 — 2023</span>
-            <h4 class="tl-role">BSc Computer Games Technology · University of West London</h4>
-            <p class="tl-desc">Dissertation: Player retention study using in-game skins<br>
-                               ● Developed a game prototype to study player retention using cosmetic systems<br>
-                               ● Designed gameplay features to analyse user engagement differences<br>
-                               ● Conducted user testing and compared retention behaviour across gameplay variations<br>
-                               Team project: Online game keystore<br>
-                               ● Built a digital e-commerce platform for game distribution<br>
-                               ● Built frontend functionality using HTML, CSS, and JavaScript<br>
-                               ● Used GitHub for version control and collaborative workflows</p>
-            <div class="tl-tags">
-              <span class="tag">Education</span>
-              <span class="tag">Unity</span>
-              <span class="tag">Figma</span>
-              <span class="tag">SDL2</span>
-              <span class="tag">C++</span>
-              <span class="tag">Game Design</span>
             </div>
           </div>
         </div>
