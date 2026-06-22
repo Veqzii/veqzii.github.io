@@ -1,417 +1,437 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio — Game Designer & Creative</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFTWARD — an AI-driven adventure</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+  :root {
+    --bg: #0d0f0c;
+    --panel: #15170f;
+    --panel-border: #2a2d22;
+    --bone: #e8e6df;
+    --bone-dim: #8e9182;
+    --green: #5fb88a;
+    --green-dim: #3a6e54;
+    --rust: #c9622a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--bone);
+    font-family: 'Spectral', serif;
+    height: 100%;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* subtle scanline texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.012) 0px,
+      rgba(255,255,255,0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    z-index: 50;
+  }
+
+  header {
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--green);
+    text-transform: uppercase;
+  }
+
+  .brand .dot { color: var(--rust); }
+
+  h1 {
+    font-family: 'Spectral', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 22px;
+    margin: 4px 0 0;
+    color: var(--bone);
+  }
+
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--bone-dim);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  #log {
+    flex: 1;
+    padding: 28px 0 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .entry { animation: fadein 0.4s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .entry .role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .entry.narrator .role { color: var(--green); }
+  .entry.player .role { color: var(--rust); }
+
+  .entry.narrator p { color: var(--bone); }
+  .entry.player p { color: var(--bone-dim); font-style: italic; }
+
+  .entry p {
+    margin: 0;
+    line-height: 1.65;
+    font-size: 16.5px;
+    white-space: pre-wrap;
+  }
+
+  .stat-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--bone-dim);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--panel-border);
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .stat-line span b { color: var(--green); font-weight: 500; }
+
+  .thinking {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .thinking .pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+
+  form {
+    display: flex;
+    gap: 10px;
+    padding: 16px 0 22px;
+    border-top: 1px solid var(--panel-border);
+  }
+
+  input[type=text] {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--bone);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 13px 14px;
+    border-radius: 3px;
+    outline: none;
+  }
+
+  input[type=text]:focus { border-color: var(--green-dim); }
+  input[type=text]::placeholder { color: var(--bone-dim); }
+
+  button {
+    background: var(--green);
+    color: #0d0f0c;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 22px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  button:hover { opacity: 0.85; }
+  button:disabled { background: var(--green-dim); cursor: not-allowed; opacity: 0.6; }
+
+  .setup {
+    max-width: 760px;
+    margin: 60px auto;
+    padding: 0 24px;
+    text-align: center;
+  }
+
+  .setup p {
+    color: var(--bone-dim);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 14px auto 26px;
+  }
+
+  .setup input[type=password] {
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--bone);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 12px 14px;
+    border-radius: 3px;
+    outline: none;
+    margin-bottom: 12px;
+  }
+
+  .setup button { padding: 12px 28px; }
+
+  .footnote {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--panel-border);
+    margin-top: 18px;
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }
+</style>
 </head>
 <body>
 
-  <!-- ░░ CURSOR ░░ -->
-  <div class="cursor" id="cursor"></div>
-  <div class="cursor-dot" id="cursorDot"></div>
-
-  <!-- ░░ NAV ░░ -->
-  <nav class="nav" id="nav">
-    <a href="index.html" class="nav-logo">AG<span>.</span></a>
-    <ul class="nav-links">
-      <li><a href="#games">Games</a></li>
-      <li><a href="#art">Art</a></li>
-      <li><a href="#docs">Documents</a></li>
-      <li><a href="#career">Career</a></li>
-      <li><a href="dungeon_delve.html" class="nav-github">▶ Play Game</a></li>
-      <li><a href="https://github.com/veqzii" target="_blank" class="nav-github">GitHub ↗</a></li>
-    </ul>
-    <button class="nav-toggle" id="navToggle" aria-label="Menu">
-      <span></span><span></span>
-    </button>
-  </nav>
-
-  <!-- ░░ HERO ░░ -->
-  <section class="hero" id="home">
-    <div class="hero-bg">
-      <canvas id="heroCanvas"></canvas>
-    </div>
-    <div class="hero-content">
-      <p class="hero-tag reveal">GAME DESIGNER · ARTIST · DEVELOPER</p>
-      <h1 class="hero-title reveal">
-        <span class="line">Aashir</span>
-        <span class="line accent-line">Gurung</span>
-      </h1>
-      <p class="hero-sub reveal">Building worlds, one mechanic at a time. I craft games, art and whatever comes next.</p>
-      <div class="hero-cta reveal">
-        <a href="#games" class="btn btn-primary">View Work</a>
-        <a href="https://github.com/veqzii" target="_blank" class="btn btn-ghost">GitHub ↗</a>
-      </div>
-    </div>
-    <div class="hero-scroll">
-      <span>Scroll</span>
-      <div class="scroll-line"></div>
-    </div>
-  </section>
-
-  <!-- ░░ GAMES ░░ -->
-  <section class="section" id="games">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-num">01</span>
-        <h2 class="section-title">Game Projects</h2>
-        <p class="section-desc">Playable builds, design documents & source code. Each project links to its GitHub repository.</p>
-      </div>
-      <div class="games-grid" id="gamesGrid">
-
-        <!-- CARD: RPS -->
-        <article class="game-card" data-tilt>
-          <div class="card-media rps-thumb">
-            <div class="rps-art">
-              <span class="rps-icon">✊</span>
-              <span class="rps-icon">✋</span>
-              <span class="rps-icon">✌️</span>
-            </div>
-            <div class="card-tag">SDL2 · C++</div>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title">Rock · Paper · Scissors</h3>
-            <p class="card-desc">A polished 2D arcade duel. All visuals rendered via SDL2 primitives — no sprites. Features animated throw sequences, RNG CPU opponent and persistent scoring.</p>
-            <div class="card-links">
-              <a href="https://github.com/veqzii/rps-game" target="_blank" class="link-chip">Source ↗</a>
-              <a href="docs/RPS_GDD.pdf" class="link-chip link-chip--doc" download>GDD ↓</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="game-card" data-tilt>
-  <div class="card-media" style="background: radial-gradient(ellipse at 40% 40%, #0d0520 0%, #000 70%);">
-    <div class="rps-art">
-      <span class="rps-icon">⚔️</span>
-      <span class="rps-icon">🏰</span>
-      <span class="rps-icon">🔮</span>
-    </div>
-    <div class="card-tag">HTML5 · Roguelike</div>
+<header>
+  <div>
+    <div class="brand">DRIFTWARD<span class="dot">·</span>AI</div>
+    <h1>a world that writes itself back</h1>
   </div>
-  <div class="card-body">
-    <h3 class="card-title">Dungeon Delve</h3>
-    <p class="card-desc">A procedurally generated roguelike dungeon crawler. Choose from 4 classes — Warrior, Rogue, Mage or Miner. Fight enemies, loot chests and spend gold at the shop between floors.</p>
-    <div class="card-links">
-      <a href="dungeon_delve.html" class="link-chip">▶ Play Now</a>
-      <a href="https://github.com/veqzii" target="_blank" class="link-chip">Source ↗</a>
-    </div>
-  </div>
-</article>
-        
-        <article class="game-card" data-tilt>
-  <div class="card-media" style="background: radial-gradient(ellipse at 40% 40%, #000820 0%, #050510 70%);">
-    <div class="rps-art">
-      <span class="rps-icon">👾</span>
-      <span class="rps-icon">🚀</span>
-      <span class="rps-icon">💥</span>
-    </div>
-    <div class="card-tag">SDL2 · C++</div>
-  </div>
-  <div class="card-body">
-    <h3 class="card-title">Space Invaders</h3>
-    <p class="card-desc">Classic arcade recreated in C++. 20 progressive levels, 3 alien types, destructible pixel shields, mystery UFO and a persistent top-10 high score table.</p>
-    <div class="card-links">
-      <a href="https://github.com/veqzii/space-invaders" target="_blank" class="link-chip">Source ↗</a>
-    </div>
-  </div>
-</article>
+  <div class="meta">claude-sonnet · live api<br>structured JSON state</div>
+</header>
 
-                <article class="game-card" data-tilt>
-  <div class="card-media" style="background: radial-gradient(ellipse at 40% 40%, #000820 0%, #050510 70%);">
-    <div class="rps-art">
-      <span class="rps-icon">🐦</span>
-      <span class="rps-icon">🎮</span>
-      <span class="rps-icon">🔌</span>
-    </div>
-    <div class="card-tag">SDL2 · C++</div>
-  </div>
-  <div class="card-body">
-    <h3 class="card-title">Flutter</h3>
-    <p class="card-desc">A polished Flappy Bird clone with unlockable skins, a coin economy, power-ups, combos and a persistent high score table.</p>
-    <div class="card-links">
-      <a href="https://github.com/Veqzii/Flutter" target="_blank" class="link-chip">Source ↗</a>
-    </div>
-  </div>
-</article>
-
-        <!-- CARD: DRIFTWARD -->
-<article class="game-card" data-tilt>
-  <div class="card-media" style="background: radial-gradient(ellipse at 40% 60%, #0d2a1a 0%, #0d0f0c 70%);">
-    <div class="rps-art">
-      <span class="rps-icon">🌊</span>
-      <span class="rps-icon">📦</span>
-      <span class="rps-icon">🌫️</span>
-    </div>
-    <div class="card-tag">Claude API · JS</div>
-  </div>
-  <div class="card-body">
-    <h3 class="card-title">Driftward</h3>
-    <p class="card-desc">A live AI-driven text adventure — Claude acts as game master, generating every room and consequence on the fly. Structured JSON prompting drives real-time stat tracking (trust, curiosity, danger) parsed directly from the model's output.</p>
-    <div class="card-links">
-      <a href="driftward.html" class="link-chip">▶ Play Now</a>
-      <a href="https://github.com/veqzii" target="_blank" class="link-chip">Source ↗</a>
-    </div>
-  </div>
-</article>
-        
-        <!-- PLACEHOLDER CARD 
-        <article class="game-card game-card--add" id="addGameCard">
-          <div class="add-inner">
-            <div class="add-icon">+</div>
-            <p>Add your next<br/>game project</p>
-            <span class="add-hint">Edit games in <code>index.html</code></span>
-          </div>
-        </article>  -->
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ░░ ART ░░ -->
-  <section class="section section--dark" id="art">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-num">02</span>
-        <h2 class="section-title">Artwork</h2>
-        <p class="section-desc">Posters, generative art, concept illustrations. Click any piece to view full size.</p>
-      </div>
-      <div class="art-masonry" id="artGrid">
-
-        <!-- RPS Poster placeholder — replace src with your actual image -->
-        <figure class="art-item art-item--wide" onclick="openLightbox('art/rps poster.png', 'Rock Paper Scissors — Promotional Poster')">
-            <div class="art-preview">
-            <img src="art/rps poster.png" alt="Rock Paper Scissors Poster" />
-            </div>
-        <figcaption>
-            <span class="art-name">Rock Paper Scissors Poster</span>
-            <span class="art-medium">PNG · Digital Art</span>
-          </figcaption>
-          </figure>
-
-        <!-- Placeholder art items -->
-          <figure class="art-item" onclick="openLightbox('art/snake-cover.png', 'Snake — Cover Art')">
-            <div class="art-preview">
-            <img src="art/snake-cover.png" alt="Snake Cover Art" />
-          </div>
-          <figcaption>
-            <span class="art-name">Snake — Cover Art</span>
-            <span class="art-medium">PNG · 2021</span>
-          </figcaption>
-          </figure>
-
-          <figure class="art-item" onclick="openLightbox('art/space-invaders-poster.png', 'Space Invaders — Retro Arcade Poster')">
-            <div class="art-preview">
-            <img src="art/space-invaders-poster.png" alt="Space Invaders Retro Poster" />
-          </div>
-          <figcaption>
-            <span class="art-name">Space Invaders — Retro Poster</span>
-            <span class="art-medium">PNG · Pixel Art</span>
-          </figcaption>
-          </figure>
-
-                  <figure class="art-item" onclick="openLightbox('art/flutter_game_poster.png', 'Flutter — Cover Art')">
-            <div class="art-preview">
-            <img src="art/flutter_game_poster.png" alt="Flutter Cover Art" />
-          </div>
-          <figcaption>
-            <span class="art-name">Flutter — Cover Art</span>
-            <span class="art-medium">Digital Art · 2022</span>
-          </figcaption>
-          </figure>
-
-      </div>
-
-  </section>
-
-  <!-- ░░ DOCUMENTS ░░ -->
-  <section class="section" id="docs">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-num">03</span>
-        <h2 class="section-title">Documents</h2>
-        <p class="section-desc">Game design documents, design briefs and written work available to download.</p>
-      </div>
-      <div class="docs-list">
-
-        <a href="docs/RPS_GDD.pdf" class="doc-row" download>
-          <div class="doc-icon pdf-icon">PDF</div>
-          <div class="doc-info">
-            <span class="doc-name">Rock Paper Scissors — Game Design Document</span>
-            <span class="doc-meta">PDF · Game Design · June 2021</span>
-          </div>
-          <div class="doc-action">Download ↓</div>
-        </a>
-
-        <a href="docs/Project Proposal.pdf" class="doc-row" download>
-          <div class="doc-icon pdf-icon">PDF</div>
-          <div class="doc-info">
-            <span class="doc-name">Project Proposal</span>
-            <span class="doc-meta">PDF · October 2022</span>
-          </div>
-          <div class="doc-action">Download ↓</div>
-        </a>
-        
-        <!-- Template row — duplicate and fill in for more docs -->
-         <!-- <div class="doc-row doc-row--placeholder">
-          <div class="doc-icon pdf-icon">PDF</div>
-          <div class="doc-info">
-            <span class="doc-name">Your Next Document</span>
-            <span class="doc-meta">Add to <code>docs/</code> folder and link here</span>
-          </div>
-          <div class="doc-action">—</div>
-        </div> -->
-      </div>
-    </div>
-  </section>
-
-
-<!-- ░░ CAREER ░░ -->
-<section class="section section--dark" id="career">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-num">04</span>
-      <h2 class="section-title">Career</h2>
-      <p class="section-desc">Experience, education and skills.</p>
-    </div>
-
-    <div class="career-layout">
-      <div class="timeline">
-
-        <div class="tl-item reveal-up">
-          <div class="tl-dot"></div>
-          <div class="tl-content">
-            <span class="tl-date">2024 — 2026</span>
-            <h4 class="tl-role">Independent Travel, Worldwide · Planned Career Break</h4>
-            <p class="tl-desc">● Took a deliberate, time-boxed break immediately after graduating to travel internationally and fully recharge
-                                 after four years of intensive, largely self-directed study.<br>
-                               ● Managed all logistics, planning, and budgeting throughout the trip entirely on my own, reinforcing practical
-                                 self-sufficiency and a calm approach to navigating unfamiliar situations.<br>
-                               ● Returned in 2026 focused, well-rested, and committed to building a long-term career in marketing rather than
-                                 rushing into the wrong role straight out of university.</p>
-            <div class="tl-tags">
-              <span class="tag">Travelling</span>
-              <span class="tag">Culture</span>
-              <span class="tag">Independent</span>
-              <span class="tag">Planning</span>
-              <span class="tag">Logistics</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tl-item reveal-up">
-          <div class="tl-dot"></div>
-          <div class="tl-content">
-            <span class="tl-date">2019 — 2023</span>
-            <h4 class="tl-role">BSc Computer Games Technology · University of West London</h4>
-            <p class="tl-desc">Dissertation: Player retention study using in-game skins<br>
-                               ● Developed a game prototype to study player retention using cosmetic systems<br>
-                               ● Designed gameplay features to analyse user engagement differences<br>
-                               ● Conducted user testing and compared retention behaviour across gameplay variations<br>
-                               Team project: Online game keystore<br>
-                               ● Built a digital e-commerce platform for game distribution<br>
-                               ● Built frontend functionality using HTML, CSS, and JavaScript<br>
-                               ● Used GitHub for version control and collaborative workflows</p>
-            <div class="tl-tags">
-              <span class="tag">Education</span>
-              <span class="tag">Unity</span>
-              <span class="tag">Figma</span>
-              <span class="tag">SDL2</span>
-              <span class="tag">C++</span>
-              <span class="tag">Game Design</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tl-item reveal-up">
-          <div class="tl-dot"></div>
-          <div class="tl-content">
-            <span class="tl-date">2018 — 2021</span>
-            <h4 class="tl-role">Digital Marketing & Social Media Manager · Horus Esports</h4>
-            <p class="tl-desc">● Acted as the primary point of contact between the organisation and prospective sponsors, communicating
-                                 directly with brands to negotiate and secure partnership and collaboration deals<br>
-                               ● Translated sponsor requirements into concrete deliverables, coordinating players' streaming schedules to meet
-                                 agreed hours and ensure consistent brand visibility.<br>
-                               ● Managed in-stream product promotion for sponsor brands, balancing partner commercial requirements with
-                                 audience engagement and content quality<br>
-                               ● Managed content planning and publishing independently across multiple platforms, developing strong habits
-                                 around self-discipline, consistency, and hitting deadlines without being chased.<br>
-                               ● Tracked content and campaign performance metrics, adjusting strategy based on what the numbers were
-                                 showing and building a natural instinct for spotting patterns and responding to them accurately.<br>
-                               ● Coordinated with streamers and content creators simultaneously, keeping multiple sponsor and content
-                                 commitments moving at once and ensuring nothing slipped through.<br>
-                               ● Worked largely unsupervised in a fast-moving environment where staying organised, meeting sponsor
-                                 expectations, and hitting deadlines was entirely down to me.</p>
-            <div class="tl-tags">
-              <span class="tag">Capcut</span>
-              <span class="tag">Figma</span>
-              <span class="tag">Social Media Managing</span>
-              <span class="tag">SEO</span>
-              <span class="tag">Communication</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="skills-panel">
-        <h3 class="skills-title">Skills</h3>
-        <div class="skill-bars">
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>C++ / SDL2</span><span>75%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:75%"></div></div>
-          </div>
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>Game Design</span><span>90%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:90%"></div></div>
-          </div>
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>2D Art / Illustration</span><span>75%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:75%"></div></div>
-          </div>
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>Unity / C#</span><span>70%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:70%"></div></div>
-          </div>
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>Figma / UI Design</span><span>65%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:65%"></div></div>
-          </div>
-        </div>
-
-        <div class="contact-block">
-          <h3 class="skills-title">Contact</h3>
-          <a href="mailto:aashirgurung11@hotmail.com" class="contact-link">aashirgurung11@hotmail.com ↗</a>
-          <a href="https://github.com/veqzii" target="_blank" class="contact-link">github.com/veqzii ↗</a>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-  <!-- ░░ FOOTER ░░ -->
-  <footer class="footer">
-    <div class="container footer-inner">
-      <span class="footer-logo">AG<span>.</span></span>
-      <p class="footer-copy">© 2026 Aashir Gurung · Built for my Portfolio</p>
-      <a href="#home" class="footer-top">Back to top ↑</a>
-    </div>
-  </footer>
-
-  <!-- ░░ LIGHTBOX ░░ -->
-  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
-    <div class="lightbox-inner" onclick="event.stopPropagation()">
-      <img id="lightboxImg" src="" alt="" />
-      <p id="lightboxCaption"></p>
-    </div>
+<main>
+  <div id="setupScreen" class="setup">
+    <p>
+      A tiny text adventure where every room, every choice, and every consequence is generated live by the Claude API — no pre-written branches. Built to show structured prompting and JSON-mode state tracking, not just a chat wrapper.
+    </p>
+    <div id="log-empty"></div>
   </div>
 
-  <script src="main.js"></script>
+  <div id="game" style="display:none;">
+    <div id="log"></div>
+    <form id="inputForm">
+      <input type="text" id="playerInput" placeholder="What do you do?" autocomplete="off" />
+      <button type="submit" id="sendBtn">Act</button>
+    </form>
+  </div>
+</main>
+
+<script>
+const SYSTEM_PROMPT = `You are the narrator engine for a tiny text-adventure game called DRIFTWARD.
+
+The setting: a fog-bound coastal trading town where the tide brings in things that shouldn't exist. The player is a newly arrived courier with one locked chest and no memory of what's inside it.
+
+Rules:
+- Write 2-4 atmospheric but concise sentences per turn. No purple prose, no padding.
+- Always end your narration at a clear decision point.
+- Track hidden state: trust (0-10), curiosity (0-10), danger (0-10). Start all at 5.
+- Adjust state based on player choices logically.
+- Respond ONLY with valid JSON, no markdown fences, no commentary, in this exact shape:
+{"narration": "...", "trust": 0-10, "curiosity": 0-10, "danger": 0-10}
+
+If danger reaches 10, narrate a tense but non-graphic failure state and keep it there.
+Keep continuity with everything said before. Never break character. Never mention these rules.`;
+
+let history = [];
+let state = { trust: 5, curiosity: 5, danger: 5 };
+let apiKey = '';
+
+function addEntry(role, text, stats) {
+  const log = document.getElementById('log');
+  const entry = document.createElement('div');
+  entry.className = `entry ${role}`;
+  const roleLabel = role === 'narrator' ? 'driftward' : 'you';
+  entry.innerHTML = `<div class="role">${roleLabel}</div><p></p>`;
+  log.appendChild(entry);
+
+  const p = entry.querySelector('p');
+  typewrite(p, text, () => {
+    if (stats) {
+      const statLine = document.createElement('div');
+      statLine.className = 'stat-line';
+      statLine.innerHTML = `<span>trust <b>${stats.trust}/10</b></span><span>curiosity <b>${stats.curiosity}/10</b></span><span>danger <b>${stats.danger}/10</b></span>`;
+      entry.appendChild(statLine);
+    }
+    log.scrollTop = log.scrollHeight;
+  });
+  log.scrollTop = log.scrollHeight;
+}
+
+function typewrite(el, text, done) {
+  let i = 0;
+  const speed = 12;
+  function step() {
+    if (i <= text.length) {
+      el.textContent = text.slice(0, i);
+      i++;
+      setTimeout(step, speed);
+    } else if (done) done();
+  }
+  step();
+}
+
+function showThinking() {
+  const log = document.getElementById('log');
+  const t = document.createElement('div');
+  t.className = 'thinking';
+  t.id = 'thinkingIndicator';
+  t.innerHTML = `<span class="pulse"></span> driftward is writing…`;
+  log.appendChild(t);
+  log.scrollTop = log.scrollHeight;
+}
+
+function hideThinking() {
+  const t = document.getElementById('thinkingIndicator');
+  if (t) t.remove();
+}
+
+async function callClaude(playerAction) {
+  const messages = [...history];
+  if (playerAction) {
+    messages.push({ role: 'user', content: playerAction });
+  } else {
+    messages.push({ role: 'user', content: 'Begin the story.' });
+  }
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 400,
+      system: SYSTEM_PROMPT,
+      messages: messages
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`API error ${response.status}: ${err}`);
+  }
+
+  const data = await response.json();
+  const raw = data.content.map(b => b.text || '').join('');
+  let parsed;
+  try {
+    parsed = JSON.parse(raw.trim());
+  } catch (e) {
+    parsed = { narration: raw, trust: state.trust, curiosity: state.curiosity, danger: state.danger };
+  }
+
+  history.push({ role: 'user', content: playerAction || 'Begin the story.' });
+  history.push({ role: 'assistant', content: raw });
+
+  return parsed;
+}
+
+async function takeTurn(playerAction) {
+  document.getElementById('sendBtn').disabled = true;
+  showThinking();
+  try {
+    const result = await callClaude(playerAction);
+    hideThinking();
+    state = { trust: result.trust, curiosity: result.curiosity, danger: result.danger };
+    addEntry('narrator', result.narration, state);
+  } catch (err) {
+    hideThinking();
+    addEntry('narrator', `[connection lost: ${err.message}]`, null);
+  }
+  document.getElementById('sendBtn').disabled = false;
+}
+
+document.getElementById('inputForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = document.getElementById('playerInput');
+  const val = input.value.trim();
+  if (!val) return;
+  addEntry('player', val, null);
+  input.value = '';
+  takeTurn(val);
+});
+
+// --- setup screen: collect API key, then start ---
+const setupScreen = document.getElementById('setupScreen');
+setupScreen.innerHTML += `
+  <input type="password" id="apiKeyInput" placeholder="sk-ant-... (your Claude API key, used client-side only)" />
+  <br>
+  <button id="startBtn">Begin</button>
+  <div class="footnote">Your key is never stored or sent anywhere except api.anthropic.com, directly from your browser.</div>
+`;
+
+document.getElementById('startBtn').addEventListener('click', async () => {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  apiKey = key;
+  setupScreen.style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  await takeTurn(null);
+});
+</script>
+
 </body>
 </html>
