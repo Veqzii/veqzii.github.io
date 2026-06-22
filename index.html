@@ -3,412 +3,338 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio — Game Designer & Creative</title>
+  <title>Aashir Gurung — Game Designer & Developer</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-  <!-- ░░ CURSOR ░░ -->
+  <!-- CURSOR -->
   <div class="cursor" id="cursor"></div>
-  <div class="cursor-dot" id="cursorDot"></div>
 
-  <!-- ░░ NAV ░░ -->
+  <!-- NAV -->
   <nav class="nav" id="nav">
-    <a href="index.html" class="nav-logo">AG<span>.</span></a>
-    <ul class="nav-links">
+    <a href="#home" class="nav-logo">AG<span class="nav-logo-dot">.</span></a>
+    <ul class="nav-links" id="navLinks">
       <li><a href="#games">Games</a></li>
       <li><a href="#art">Art</a></li>
-      <li><a href="#docs">Documents</a></li>
+      <li><a href="#docs">Docs</a></li>
       <li><a href="#career">Career</a></li>
-      <li><a href="dungeon_delve.html" class="nav-github">▶ Play Game</a></li>
-      <li><a href="https://github.com/veqzii" target="_blank" class="nav-github">GitHub ↗</a></li>
+      <li><a href="driftward.html" class="nav-cta">▶ Play Driftward</a></li>
     </ul>
     <button class="nav-toggle" id="navToggle" aria-label="Menu">
       <span></span><span></span>
     </button>
   </nav>
 
-  <!-- ░░ HERO ░░ -->
+  <!-- HERO -->
   <section class="hero" id="home">
-    <div class="hero-bg">
-      <canvas id="heroCanvas"></canvas>
-    </div>
-    <div class="hero-content">
-      <p class="hero-tag reveal">GAME DESIGNER · ARTIST · DEVELOPER</p>
-      <h1 class="hero-title reveal">
-        <span class="line">Aashir</span>
-        <span class="line accent-line">Gurung</span>
+    <div class="hero-grid-bg"></div>
+    <div class="hero-inner">
+      <div class="hero-eyebrow">
+        <span class="mono">PORTFOLIO_v2026</span>
+        <span class="hero-status"><span class="status-dot"></span>Available for work</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="hero-name" id="heroName"></span><span class="hero-cursor" id="heroCursor">_</span>
       </h1>
-      <p class="hero-sub reveal">Building worlds, one mechanic at a time. I craft games, art and whatever comes next.</p>
-      <div class="hero-cta reveal">
-        <a href="#games" class="btn btn-primary">View Work</a>
-        <a href="https://github.com/veqzii" target="_blank" class="btn btn-ghost">GitHub ↗</a>
+      <p class="hero-role">Game Designer · Developer · Artist</p>
+      <p class="hero-bio">I build games that feel good to hold. C++, HTML5, and AI — whatever the mechanic needs.</p>
+      <div class="hero-links">
+        <a href="#games" class="btn-primary">See the work</a>
+        <a href="https://github.com/veqzii" target="_blank" class="btn-ghost">GitHub ↗</a>
+        <a href="mailto:aashirgurung11@hotmail.com" class="btn-ghost">Email ↗</a>
       </div>
     </div>
-    <div class="hero-scroll">
-      <span>Scroll</span>
-      <div class="scroll-line"></div>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num">5</span>
+        <span class="stat-label">Games shipped</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num">3</span>
+        <span class="stat-label">Languages</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num">BSc</span>
+        <span class="stat-label">Games Technology</span>
+      </div>
     </div>
   </section>
 
-  <!-- ░░ GAMES ░░ -->
+  <!-- GAMES -->
   <section class="section" id="games">
     <div class="container">
-      <div class="section-header">
-        <span class="section-num">01</span>
-        <h2 class="section-title">Game Projects</h2>
-        <p class="section-desc">Playable builds, design documents & source code. Each project links to its GitHub repository.</p>
-      </div>
-      <div class="games-grid" id="gamesGrid">
+      <header class="section-head">
+        <div class="section-label mono">// GAME_PROJECTS</div>
+        <h2 class="section-title">Things I've built</h2>
+      </header>
 
-        <!-- CARD: RPS -->
-        <article class="game-card" data-tilt>
-          <div class="card-media rps-thumb">
-            <div class="rps-art">
-              <span class="rps-icon">✊</span>
-              <span class="rps-icon">✋</span>
-              <span class="rps-icon">✌️</span>
+      <div class="games-grid">
+
+        <!-- DRIFTWARD — featured, top -->
+        <article class="game-card game-card--featured reveal">
+          <div class="card-accent" style="--accent-color: #c8f0e8;"></div>
+          <div class="card-inner">
+            <div class="card-header">
+              <div class="card-icon">🌊</div>
+              <span class="card-tag mono">Claude API · JS · AI</span>
             </div>
-            <div class="card-tag">SDL2 · C++</div>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title">Rock · Paper · Scissors</h3>
-            <p class="card-desc">A polished 2D arcade duel. All visuals rendered via SDL2 primitives — no sprites. Features animated throw sequences, RNG CPU opponent and persistent scoring.</p>
+            <h3 class="card-title">Driftward</h3>
+            <p class="card-desc">A live AI-driven text adventure. Claude acts as a structured game master, generating every room and consequence on the fly. JSON-mode prompting drives real-time stat tracking — trust, curiosity, danger — parsed directly from the model output. No pre-written branches.</p>
+            <div class="card-tech">
+              <span>Structured prompting</span>
+              <span>Conversation state</span>
+              <span>Live API</span>
+            </div>
             <div class="card-links">
-              <a href="https://github.com/veqzii/rps-game" target="_blank" class="link-chip">Source ↗</a>
-              <a href="docs/RPS_GDD.pdf" class="link-chip link-chip--doc" download>GDD ↓</a>
+              <a href="driftward.html" class="link-play">▶ Play now</a>
+              <a href="https://github.com/veqzii" target="_blank" class="link-secondary">Source ↗</a>
             </div>
           </div>
         </article>
 
-        <article class="game-card" data-tilt>
-  <div class="card-media" style="background: radial-gradient(ellipse at 40% 40%, #0d0520 0%, #000 70%);">
-    <div class="rps-art">
-      <span class="rps-icon">⚔️</span>
-      <span class="rps-icon">🏰</span>
-      <span class="rps-icon">🔮</span>
-    </div>
-    <div class="card-tag">HTML5 · Roguelike</div>
-  </div>
-  <div class="card-body">
-    <h3 class="card-title">Dungeon Delve</h3>
-    <p class="card-desc">A procedurally generated roguelike dungeon crawler. Choose from 4 classes — Warrior, Rogue, Mage or Miner. Fight enemies, loot chests and spend gold at the shop between floors.</p>
-    <div class="card-links">
-      <a href="dungeon_delve.html" class="link-chip">▶ Play Now</a>
-      <a href="https://github.com/veqzii" target="_blank" class="link-chip">Source ↗</a>
-    </div>
-  </div>
-</article>
-        
-        <article class="game-card" data-tilt>
-  <div class="card-media" style="background: radial-gradient(ellipse at 40% 40%, #000820 0%, #050510 70%);">
-    <div class="rps-art">
-      <span class="rps-icon">👾</span>
-      <span class="rps-icon">🚀</span>
-      <span class="rps-icon">💥</span>
-    </div>
-    <div class="card-tag">SDL2 · C++</div>
-  </div>
-  <div class="card-body">
-    <h3 class="card-title">Space Invaders</h3>
-    <p class="card-desc">Classic arcade recreated in C++. 20 progressive levels, 3 alien types, destructible pixel shields, mystery UFO and a persistent top-10 high score table.</p>
-    <div class="card-links">
-      <a href="https://github.com/veqzii/space-invaders" target="_blank" class="link-chip">Source ↗</a>
-    </div>
-  </div>
-</article>
-
-                <article class="game-card" data-tilt>
-  <div class="card-media" style="background: radial-gradient(ellipse at 40% 40%, #000820 0%, #050510 70%);">
-    <div class="rps-art">
-      <span class="rps-icon">🐦</span>
-      <span class="rps-icon">🎮</span>
-      <span class="rps-icon">🔌</span>
-    </div>
-    <div class="card-tag">SDL2 · C++</div>
-  </div>
-  <div class="card-body">
-    <h3 class="card-title">Flutter</h3>
-    <p class="card-desc">A polished Flappy Bird clone with unlockable skins, a coin economy, power-ups, combos and a persistent high score table.</p>
-    <div class="card-links">
-      <a href="https://github.com/Veqzii/Flutter" target="_blank" class="link-chip">Source ↗</a>
-    </div>
-  </div>
-</article>
-
-        <!-- CARD: DRIFTWARD -->
-<article class="game-card" data-tilt>
-  <div class="card-media" style="background: radial-gradient(ellipse at 40% 60%, #0d2a1a 0%, #0d0f0c 70%);">
-    <div class="rps-art">
-      <span class="rps-icon">🌊</span>
-      <span class="rps-icon">📦</span>
-      <span class="rps-icon">🌫️</span>
-    </div>
-    <div class="card-tag">Claude API · JS</div>
-  </div>
-  <div class="card-body">
-    <h3 class="card-title">Driftward</h3>
-    <p class="card-desc">A live AI-driven text adventure — Claude acts as game master, generating every room and consequence on the fly. Structured JSON prompting drives real-time stat tracking (trust, curiosity, danger) parsed directly from the model's output.</p>
-    <div class="card-links">
-      <a href="driftward.html" class="link-chip">▶ Play Now</a>
-      <a href="https://github.com/veqzii" target="_blank" class="link-chip">Source ↗</a>
-    </div>
-  </div>
-</article>
-        
-        <!-- PLACEHOLDER CARD 
-        <article class="game-card game-card--add" id="addGameCard">
-          <div class="add-inner">
-            <div class="add-icon">+</div>
-            <p>Add your next<br/>game project</p>
-            <span class="add-hint">Edit games in <code>index.html</code></span>
-          </div>
-        </article>  -->
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ░░ ART ░░ -->
-  <section class="section section--dark" id="art">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-num">02</span>
-        <h2 class="section-title">Artwork</h2>
-        <p class="section-desc">Posters, generative art, concept illustrations. Click any piece to view full size.</p>
-      </div>
-      <div class="art-masonry" id="artGrid">
-
-        <!-- RPS Poster placeholder — replace src with your actual image -->
-        <figure class="art-item art-item--wide" onclick="openLightbox('art/rps poster.png', 'Rock Paper Scissors — Promotional Poster')">
-            <div class="art-preview">
-            <img src="art/rps poster.png" alt="Rock Paper Scissors Poster" />
+        <!-- RPS -->
+        <article class="game-card reveal">
+          <div class="card-accent" style="--accent-color: #f5a623;"></div>
+          <div class="card-inner">
+            <div class="card-header">
+              <div class="card-icon">✊</div>
+              <span class="card-tag mono">SDL2 · C++</span>
             </div>
-        <figcaption>
-            <span class="art-name">Rock Paper Scissors Poster</span>
-            <span class="art-medium">PNG · Digital Art</span>
-          </figcaption>
-          </figure>
-
-        <!-- Placeholder art items -->
-          <figure class="art-item" onclick="openLightbox('art/snake-cover.png', 'Snake — Cover Art')">
-            <div class="art-preview">
-            <img src="art/snake-cover.png" alt="Snake Cover Art" />
+            <h3 class="card-title">Rock · Paper · Scissors</h3>
+            <p class="card-desc">Polished 2D arcade duel. All visuals rendered via SDL2 primitives — zero sprites. Animated throw sequences, RNG opponent, persistent scoring.</p>
+            <div class="card-links">
+              <a href="https://github.com/veqzii/rps-game" target="_blank" class="link-secondary">Source ↗</a>
+              <a href="docs/RPS_GDD.pdf" class="link-secondary link-doc" download>GDD ↓</a>
+            </div>
           </div>
-          <figcaption>
-            <span class="art-name">Snake — Cover Art</span>
-            <span class="art-medium">PNG · 2021</span>
-          </figcaption>
-          </figure>
+        </article>
 
-          <figure class="art-item" onclick="openLightbox('art/space-invaders-poster.png', 'Space Invaders — Retro Arcade Poster')">
-            <div class="art-preview">
-            <img src="art/space-invaders-poster.png" alt="Space Invaders Retro Poster" />
+        <!-- DUNGEON DELVE -->
+        <article class="game-card reveal">
+          <div class="card-accent" style="--accent-color: #a78bfa;"></div>
+          <div class="card-inner">
+            <div class="card-header">
+              <div class="card-icon">⚔️</div>
+              <span class="card-tag mono">HTML5 · Roguelike</span>
+            </div>
+            <h3 class="card-title">Dungeon Delve</h3>
+            <p class="card-desc">Procedurally generated roguelike. 4 classes — Warrior, Rogue, Mage, Miner. Fight, loot, spend gold at the shop between floors.</p>
+            <div class="card-links">
+              <a href="dungeon_delve.html" class="link-play">▶ Play now</a>
+              <a href="https://github.com/veqzii" target="_blank" class="link-secondary">Source ↗</a>
+            </div>
           </div>
-          <figcaption>
-            <span class="art-name">Space Invaders — Retro Poster</span>
-            <span class="art-medium">PNG · Pixel Art</span>
-          </figcaption>
-          </figure>
+        </article>
 
-                  <figure class="art-item" onclick="openLightbox('art/flutter_game_poster.png', 'Flutter — Cover Art')">
-            <div class="art-preview">
-            <img src="art/flutter_game_poster.png" alt="Flutter Cover Art" />
+        <!-- SPACE INVADERS -->
+        <article class="game-card reveal">
+          <div class="card-accent" style="--accent-color: #67e8f9;"></div>
+          <div class="card-inner">
+            <div class="card-header">
+              <div class="card-icon">👾</div>
+              <span class="card-tag mono">SDL2 · C++</span>
+            </div>
+            <h3 class="card-title">Space Invaders</h3>
+            <p class="card-desc">Classic arcade recreated in C++. 20 progressive levels, 3 alien types, destructible pixel shields, mystery UFO, persistent top-10 table.</p>
+            <div class="card-links">
+              <a href="https://github.com/veqzii/space-invaders" target="_blank" class="link-secondary">Source ↗</a>
+            </div>
           </div>
-          <figcaption>
-            <span class="art-name">Flutter — Cover Art</span>
-            <span class="art-medium">Digital Art · 2022</span>
-          </figcaption>
-          </figure>
+        </article>
+
+        <!-- FLUTTER -->
+        <article class="game-card reveal">
+          <div class="card-accent" style="--accent-color: #f472b6;"></div>
+          <div class="card-inner">
+            <div class="card-header">
+              <div class="card-icon">🐦</div>
+              <span class="card-tag mono">SDL2 · C++</span>
+            </div>
+            <h3 class="card-title">Flutter</h3>
+            <p class="card-desc">Polished Flappy Bird clone. Unlockable skins, coin economy, power-ups, combos, persistent high score table.</p>
+            <div class="card-links">
+              <a href="https://github.com/Veqzii/Flutter" target="_blank" class="link-secondary">Source ↗</a>
+            </div>
+          </div>
+        </article>
 
       </div>
-
+    </div>
   </section>
 
-  <!-- ░░ DOCUMENTS ░░ -->
+  <!-- ART -->
+  <section class="section section--alt" id="art">
+    <div class="container">
+      <header class="section-head">
+        <div class="section-label mono">// ARTWORK</div>
+        <h2 class="section-title">Visual work</h2>
+      </header>
+
+      <div class="art-grid">
+        <figure class="art-item art-item--wide reveal" onclick="openLightbox('art/rps poster.png','Rock Paper Scissors — Promotional Poster')">
+          <div class="art-img-wrap">
+            <img src="art/rps poster.png" alt="Rock Paper Scissors Poster" loading="lazy" />
+          </div>
+          <figcaption><span>Rock Paper Scissors Poster</span><span class="mono">Digital Art</span></figcaption>
+        </figure>
+
+        <figure class="art-item reveal" onclick="openLightbox('art/snake-cover.png','Snake — Cover Art')">
+          <div class="art-img-wrap">
+            <img src="art/snake-cover.png" alt="Snake Cover Art" loading="lazy" />
+          </div>
+          <figcaption><span>Snake — Cover Art</span><span class="mono">2021</span></figcaption>
+        </figure>
+
+        <figure class="art-item reveal" onclick="openLightbox('art/space-invaders-poster.png','Space Invaders — Retro Arcade Poster')">
+          <div class="art-img-wrap">
+            <img src="art/space-invaders-poster.png" alt="Space Invaders Poster" loading="lazy" />
+          </div>
+          <figcaption><span>Space Invaders — Retro Poster</span><span class="mono">Pixel Art</span></figcaption>
+        </figure>
+
+        <figure class="art-item art-item--wide reveal" onclick="openLightbox('art/flutter_game_poster.png','Flutter — Cover Art')">
+          <div class="art-img-wrap">
+            <img src="art/flutter_game_poster.png" alt="Flutter Cover Art" loading="lazy" />
+          </div>
+          <figcaption><span>Flutter — Cover Art</span><span class="mono">Digital Art · 2022</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOCUMENTS -->
   <section class="section" id="docs">
     <div class="container">
-      <div class="section-header">
-        <span class="section-num">03</span>
-        <h2 class="section-title">Documents</h2>
-        <p class="section-desc">Game design documents, design briefs and written work available to download.</p>
-      </div>
-      <div class="docs-list">
+      <header class="section-head">
+        <div class="section-label mono">// DOCUMENTS</div>
+        <h2 class="section-title">Design writing</h2>
+      </header>
 
-        <a href="docs/RPS_GDD.pdf" class="doc-row" download>
-          <div class="doc-icon pdf-icon">PDF</div>
+      <div class="docs-list">
+        <a href="docs/RPS_GDD.pdf" class="doc-row reveal" download>
+          <span class="doc-tag mono">PDF</span>
           <div class="doc-info">
             <span class="doc-name">Rock Paper Scissors — Game Design Document</span>
-            <span class="doc-meta">PDF · Game Design · June 2021</span>
+            <span class="doc-meta mono">Game Design · June 2021</span>
           </div>
-          <div class="doc-action">Download ↓</div>
+          <span class="doc-dl">Download ↓</span>
         </a>
-
-        <a href="docs/Project Proposal.pdf" class="doc-row" download>
-          <div class="doc-icon pdf-icon">PDF</div>
+        <a href="docs/Project Proposal.pdf" class="doc-row reveal" download>
+          <span class="doc-tag mono">PDF</span>
           <div class="doc-info">
             <span class="doc-name">Project Proposal</span>
-            <span class="doc-meta">PDF · October 2022</span>
+            <span class="doc-meta mono">October 2022</span>
           </div>
-          <div class="doc-action">Download ↓</div>
+          <span class="doc-dl">Download ↓</span>
         </a>
-        
-        <!-- Template row — duplicate and fill in for more docs -->
-         <!-- <div class="doc-row doc-row--placeholder">
-          <div class="doc-icon pdf-icon">PDF</div>
-          <div class="doc-info">
-            <span class="doc-name">Your Next Document</span>
-            <span class="doc-meta">Add to <code>docs/</code> folder and link here</span>
-          </div>
-          <div class="doc-action">—</div>
-        </div> -->
       </div>
     </div>
   </section>
 
+  <!-- CAREER -->
+  <section class="section section--alt" id="career">
+    <div class="container">
+      <header class="section-head">
+        <div class="section-label mono">// CAREER</div>
+        <h2 class="section-title">Experience & skills</h2>
+      </header>
 
-<!-- ░░ CAREER ░░ -->
-<section class="section section--dark" id="career">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-num">04</span>
-      <h2 class="section-title">Career</h2>
-      <p class="section-desc">Experience, education and skills.</p>
-    </div>
+      <div class="career-layout">
+        <div class="timeline">
 
-    <div class="career-layout">
-      <div class="timeline">
-
-        <div class="tl-item reveal-up">
-          <div class="tl-dot"></div>
-          <div class="tl-content">
-            <span class="tl-date">2024 — 2026</span>
-            <h4 class="tl-role">Independent Travel, Worldwide · Planned Career Break</h4>
-            <p class="tl-desc">● Took a deliberate, time-boxed break immediately after graduating to travel internationally and fully recharge
-                                 after four years of intensive, largely self-directed study.<br>
-                               ● Managed all logistics, planning, and budgeting throughout the trip entirely on my own, reinforcing practical
-                                 self-sufficiency and a calm approach to navigating unfamiliar situations.<br>
-                               ● Returned in 2026 focused, well-rested, and committed to building a long-term career in marketing rather than
-                                 rushing into the wrong role straight out of university.</p>
-            <div class="tl-tags">
-              <span class="tag">Travelling</span>
-              <span class="tag">Culture</span>
-              <span class="tag">Independent</span>
-              <span class="tag">Planning</span>
-              <span class="tag">Logistics</span>
+          <div class="tl-item reveal">
+            <div class="tl-year mono">2024 — 2026</div>
+            <div class="tl-body">
+              <h4 class="tl-role">Independent Travel · Planned Career Break</h4>
+              <p class="tl-desc">Took a deliberate break post-graduation to travel internationally — managing all logistics, budgeting and planning independently. Returned in 2026 focused and committed to building in marketing and games.</p>
+              <div class="tl-tags">
+                <span>Travelling</span><span>Logistics</span><span>Planning</span><span>Independent</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="tl-item reveal-up">
-          <div class="tl-dot"></div>
-          <div class="tl-content">
-            <span class="tl-date">2019 — 2023</span>
-            <h4 class="tl-role">BSc Computer Games Technology · University of West London</h4>
-            <p class="tl-desc">Dissertation: Player retention study using in-game skins<br>
-                               ● Developed a game prototype to study player retention using cosmetic systems<br>
-                               ● Designed gameplay features to analyse user engagement differences<br>
-                               ● Conducted user testing and compared retention behaviour across gameplay variations<br>
-                               Team project: Online game keystore<br>
-                               ● Built a digital e-commerce platform for game distribution<br>
-                               ● Built frontend functionality using HTML, CSS, and JavaScript<br>
-                               ● Used GitHub for version control and collaborative workflows</p>
-            <div class="tl-tags">
-              <span class="tag">Education</span>
-              <span class="tag">Unity</span>
-              <span class="tag">Figma</span>
-              <span class="tag">SDL2</span>
-              <span class="tag">C++</span>
-              <span class="tag">Game Design</span>
+          <div class="tl-item reveal">
+            <div class="tl-year mono">2019 — 2023</div>
+            <div class="tl-body">
+              <h4 class="tl-role">BSc Computer Games Technology · University of West London</h4>
+              <p class="tl-desc">Dissertation: player retention study using in-game cosmetic systems — built a prototype, designed gameplay features, ran user testing. Team project: built an e-commerce keystore using HTML, CSS, JS and GitHub collaborative workflows.</p>
+              <div class="tl-tags">
+                <span>C++</span><span>SDL2</span><span>Unity</span><span>Figma</span><span>Game Design</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="tl-item reveal-up">
-          <div class="tl-dot"></div>
-          <div class="tl-content">
-            <span class="tl-date">2018 — 2021</span>
-            <h4 class="tl-role">Digital Marketing & Social Media Manager · Horus Esports</h4>
-            <p class="tl-desc">● Acted as the primary point of contact between the organisation and prospective sponsors, communicating
-                                 directly with brands to negotiate and secure partnership and collaboration deals<br>
-                               ● Translated sponsor requirements into concrete deliverables, coordinating players' streaming schedules to meet
-                                 agreed hours and ensure consistent brand visibility.<br>
-                               ● Managed in-stream product promotion for sponsor brands, balancing partner commercial requirements with
-                                 audience engagement and content quality<br>
-                               ● Managed content planning and publishing independently across multiple platforms, developing strong habits
-                                 around self-discipline, consistency, and hitting deadlines without being chased.<br>
-                               ● Tracked content and campaign performance metrics, adjusting strategy based on what the numbers were
-                                 showing and building a natural instinct for spotting patterns and responding to them accurately.<br>
-                               ● Coordinated with streamers and content creators simultaneously, keeping multiple sponsor and content
-                                 commitments moving at once and ensuring nothing slipped through.<br>
-                               ● Worked largely unsupervised in a fast-moving environment where staying organised, meeting sponsor
-                                 expectations, and hitting deadlines was entirely down to me.</p>
-            <div class="tl-tags">
-              <span class="tag">Capcut</span>
-              <span class="tag">Figma</span>
-              <span class="tag">Social Media Managing</span>
-              <span class="tag">SEO</span>
-              <span class="tag">Communication</span>
+          <div class="tl-item reveal">
+            <div class="tl-year mono">2018 — 2021</div>
+            <div class="tl-body">
+              <h4 class="tl-role">Digital Marketing & Social Media Manager · Horus Esports</h4>
+              <p class="tl-desc">Primary contact for sponsor negotiations — translated partner requirements into streaming schedules and content deliverables. Managed planning and publishing across platforms independently, tracking performance metrics and adjusting strategy on the numbers.</p>
+              <div class="tl-tags">
+                <span>Social Media</span><span>SEO</span><span>Figma</span><span>CapCut</span><span>Sponsorships</span>
+              </div>
             </div>
           </div>
+
         </div>
 
+        <aside class="skills-col">
+          <div class="skills-block">
+            <h3 class="skills-heading mono">// SKILLS</h3>
+            <div class="skill-list" id="skillList">
+              <div class="skill-item reveal">
+                <div class="skill-top"><span>Game Design</span><span class="mono">90%</span></div>
+                <div class="skill-bar"><div class="skill-fill" style="--w:90%"></div></div>
+              </div>
+              <div class="skill-item reveal">
+                <div class="skill-top"><span>C++ / SDL2</span><span class="mono">75%</span></div>
+                <div class="skill-bar"><div class="skill-fill" style="--w:75%"></div></div>
+              </div>
+              <div class="skill-item reveal">
+                <div class="skill-top"><span>2D Art / Illustration</span><span class="mono">75%</span></div>
+                <div class="skill-bar"><div class="skill-fill" style="--w:75%"></div></div>
+              </div>
+              <div class="skill-item reveal">
+                <div class="skill-top"><span>Unity / C#</span><span class="mono">70%</span></div>
+                <div class="skill-bar"><div class="skill-fill" style="--w:70%"></div></div>
+              </div>
+              <div class="skill-item reveal">
+                <div class="skill-top"><span>Figma / UI Design</span><span class="mono">65%</span></div>
+                <div class="skill-bar"><div class="skill-fill" style="--w:65%"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-block">
+            <h3 class="skills-heading mono">// CONTACT</h3>
+            <a href="mailto:aashirgurung11@hotmail.com" class="contact-link">aashirgurung11@hotmail.com</a>
+            <a href="https://github.com/veqzii" target="_blank" class="contact-link">github.com/veqzii</a>
+          </div>
+        </aside>
       </div>
-
-      <div class="skills-panel">
-        <h3 class="skills-title">Skills</h3>
-        <div class="skill-bars">
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>C++ / SDL2</span><span>75%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:75%"></div></div>
-          </div>
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>Game Design</span><span>90%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:90%"></div></div>
-          </div>
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>2D Art / Illustration</span><span>75%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:75%"></div></div>
-          </div>
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>Unity / C#</span><span>70%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:70%"></div></div>
-          </div>
-          <div class="skill-bar reveal-up">
-            <div class="skill-label"><span>Figma / UI Design</span><span>65%</span></div>
-            <div class="skill-track"><div class="skill-fill" style="--w:65%"></div></div>
-          </div>
-        </div>
-
-        <div class="contact-block">
-          <h3 class="skills-title">Contact</h3>
-          <a href="mailto:aashirgurung11@hotmail.com" class="contact-link">aashirgurung11@hotmail.com ↗</a>
-          <a href="https://github.com/veqzii" target="_blank" class="contact-link">github.com/veqzii ↗</a>
-        </div>
-      </div>
-
     </div>
-  </div>
-</section>
+  </section>
 
-  <!-- ░░ FOOTER ░░ -->
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer-inner">
-      <span class="footer-logo">AG<span>.</span></span>
-      <p class="footer-copy">© 2026 Aashir Gurung · Built for my Portfolio</p>
-      <a href="#home" class="footer-top">Back to top ↑</a>
+      <span class="footer-logo mono">AG.</span>
+      <p class="footer-copy">© 2026 Aashir Gurung</p>
+      <a href="#home" class="footer-top">↑ Top</a>
     </div>
   </footer>
 
-  <!-- ░░ LIGHTBOX ░░ -->
+  <!-- LIGHTBOX -->
   <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
-    <div class="lightbox-inner" onclick="event.stopPropagation()">
-      <img id="lightboxImg" src="" alt="" />
-      <p id="lightboxCaption"></p>
+    <button class="lb-close" onclick="closeLightbox()">✕</button>
+    <div class="lb-inner" onclick="event.stopPropagation()">
+      <img id="lbImg" src="" alt="" />
+      <p id="lbCaption"></p>
     </div>
   </div>
 
