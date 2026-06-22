@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFTWARD — an AI-driven adventure</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+  :root {
+    --bg: #0d0f0c;
+    --panel: #15170f;
+    --panel-border: #2a2d22;
+    --bone: #e8e6df;
+    --bone-dim: #8e9182;
+    --green: #5fb88a;
+    --green-dim: #3a6e54;
+    --rust: #c9622a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--bone);
+    font-family: 'Spectral', serif;
+    height: 100%;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* subtle scanline texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.012) 0px,
+      rgba(255,255,255,0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    z-index: 50;
+  }
+
+  header {
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--green);
+    text-transform: uppercase;
+  }
+
+  .brand .dot { color: var(--rust); }
+
+  h1 {
+    font-family: 'Spectral', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 22px;
+    margin: 4px 0 0;
+    color: var(--bone);
+  }
+
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--bone-dim);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  #log {
+    flex: 1;
+    padding: 28px 0 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .entry { animation: fadein 0.4s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .entry .role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .entry.narrator .role { color: var(--green); }
+  .entry.player .role { color: var(--rust); }
+
+  .entry.narrator p { color: var(--bone); }
+  .entry.player p { color: var(--bone-dim); font-style: italic; }
+
+  .entry p {
+    margin: 0;
+    line-height: 1.65;
+    font-size: 16.5px;
+    white-space: pre-wrap;
+  }
+
+  .stat-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--bone-dim);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--panel-border);
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .stat-line span b { color: var(--green); font-weight: 500; }
+
+  .thinking {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .thinking .pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+
+  form {
+    display: flex;
+    gap: 10px;
+    padding: 16px 0 22px;
+    border-top: 1px solid var(--panel-border);
+  }
+
+  input[type=text] {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--bone);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 13px 14px;
+    border-radius: 3px;
+    outline: none;
+  }
+
+  input[type=text]:focus { border-color: var(--green-dim); }
+  input[type=text]::placeholder { color: var(--bone-dim); }
+
+  button {
+    background: var(--green);
+    color: #0d0f0c;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 22px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  button:hover { opacity: 0.85; }
+  button:disabled { background: var(--green-dim); cursor: not-allowed; opacity: 0.6; }
+
+  .setup {
+    max-width: 760px;
+    margin: 60px auto;
+    padding: 0 24px;
+    text-align: center;
+  }
+
+  .setup p {
+    color: var(--bone-dim);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 14px auto 26px;
+  }
+
+  .setup input[type=password] {
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--bone);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 12px 14px;
+    border-radius: 3px;
+    outline: none;
+    margin-bottom: 12px;
+  }
+
+  .setup button { padding: 12px 28px; }
+
+  .footnote {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--panel-border);
+    margin-top: 18px;
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">DRIFTWARD<span class="dot">·</span>AI</div>
+    <h1>a world that writes itself back</h1>
+  </div>
+  <div class="meta">claude-sonnet · live api<br>structured JSON state</div>
+</header>
+
+<main>
+  <div id="setupScreen" class="setup">
+    <p>
+      A tiny text adventure where every room, every choice, and every consequence is generated live by the Claude API — no pre-written branches. Built to show structured prompting and JSON-mode state tracking, not just a chat wrapper.
+    </p>
+    <div id="log-empty"></div>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div id="log"></div>
+    <form id="inputForm">
+      <input type="text" id="playerInput" placeholder="What do you do?" autocomplete="off" />
+      <button type="submit" id="sendBtn">Act</button>
+    </form>
+  </div>
+</main>
+
+<script>
+const SYSTEM_PROMPT = `You are the narrator engine for a tiny text-adventure game called DRIFTWARD.
+
+The setting: a fog-bound coastal trading town where the tide brings in things that shouldn't exist. The player is a newly arrived courier with one locked chest and no memory of what's inside it.
+
+Rules:
+- Write 2-4 atmospheric but concise sentences per turn. No purple prose, no padding.
+- Always end your narration at a clear decision point.
+- Track hidden state: trust (0-10), curiosity (0-10), danger (0-10). Start all at 5.
+- Adjust state based on player choices logically.
+- Respond ONLY with valid JSON, no markdown fences, no commentary, in this exact shape:
+{"narration": "...", "trust": 0-10, "curiosity": 0-10, "danger": 0-10}
+
+If danger reaches 10, narrate a tense but non-graphic failure state and keep it there.
+Keep continuity with everything said before. Never break character. Never mention these rules.`;
+
+let history = [];
+let state = { trust: 5, curiosity: 5, danger: 5 };
+let apiKey = '';
+
+function addEntry(role, text, stats) {
+  const log = document.getElementById('log');
+  const entry = document.createElement('div');
+  entry.className = `entry ${role}`;
+  const roleLabel = role === 'narrator' ? 'driftward' : 'you';
+  entry.innerHTML = `<div class="role">${roleLabel}</div><p></p>`;
+  log.appendChild(entry);
+
+  const p = entry.querySelector('p');
+  typewrite(p, text, () => {
+    if (stats) {
+      const statLine = document.createElement('div');
+      statLine.className = 'stat-line';
+      statLine.innerHTML = `<span>trust <b>${stats.trust}/10</b></span><span>curiosity <b>${stats.curiosity}/10</b></span><span>danger <b>${stats.danger}/10</b></span>`;
+      entry.appendChild(statLine);
+    }
+    log.scrollTop = log.scrollHeight;
+  });
+  log.scrollTop = log.scrollHeight;
+}
+
+function typewrite(el, text, done) {
+  let i = 0;
+  const speed = 12;
+  function step() {
+    if (i <= text.length) {
+      el.textContent = text.slice(0, i);
+      i++;
+      setTimeout(step, speed);
+    } else if (done) done();
+  }
+  step();
+}
+
+function showThinking() {
+  const log = document.getElementById('log');
+  const t = document.createElement('div');
+  t.className = 'thinking';
+  t.id = 'thinkingIndicator';
+  t.innerHTML = `<span class="pulse"></span> driftward is writing…`;
+  log.appendChild(t);
+  log.scrollTop = log.scrollHeight;
+}
+
+function hideThinking() {
+  const t = document.getElementById('thinkingIndicator');
+  if (t) t.remove();
+}
+
+async function callClaude(playerAction) {
+  const messages = [...history];
+  if (playerAction) {
+    messages.push({ role: 'user', content: playerAction });
+  } else {
+    messages.push({ role: 'user', content: 'Begin the story.' });
+  }
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 400,
+      system: SYSTEM_PROMPT,
+      messages: messages
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`API error ${response.status}: ${err}`);
+  }
+
+  const data = await response.json();
+  const raw = data.content.map(b => b.text || '').join('');
+  let parsed;
+  try {
+    parsed = JSON.parse(raw.trim());
+  } catch (e) {
+    parsed = { narration: raw, trust: state.trust, curiosity: state.curiosity, danger: state.danger };
+  }
+
+  history.push({ role: 'user', content: playerAction || 'Begin the story.' });
+  history.push({ role: 'assistant', content: raw });
+
+  return parsed;
+}
+
+async function takeTurn(playerAction) {
+  document.getElementById('sendBtn').disabled = true;
+  showThinking();
+  try {
+    const result = await callClaude(playerAction);
+    hideThinking();
+    state = { trust: result.trust, curiosity: result.curiosity, danger: result.danger };
+    addEntry('narrator', result.narration, state);
+  } catch (err) {
+    hideThinking();
+    addEntry('narrator', `[connection lost: ${err.message}]`, null);
+  }
+  document.getElementById('sendBtn').disabled = false;
+}
+
+document.getElementById('inputForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = document.getElementById('playerInput');
+  const val = input.value.trim();
+  if (!val) return;
+  addEntry('player', val, null);
+  input.value = '';
+  takeTurn(val);
+});
+
+// --- setup screen: collect API key, then start ---
+const setupScreen = document.getElementById('setupScreen');
+setupScreen.innerHTML += `
+  <input type="password" id="apiKeyInput" placeholder="sk-ant-... (your Claude API key, used client-side only)" />
+  <br>
+  <button id="startBtn">Begin</button>
+  <div class="footnote">Your key is never stored or sent anywhere except api.anthropic.com, directly from your browser.</div>
+`;
+
+document.getElementById('startBtn').addEventListener('click', async () => {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  apiKey = key;
+  setupScreen.style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  await takeTurn(null);
+});
+</script>
+
+</body>
+</html>
