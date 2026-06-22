@@ -138,6 +138,26 @@
     </div>
   </div>
 </article>
+
+        <!-- CARD: DRIFTWARD -->
+<article class="game-card" data-tilt>
+  <div class="card-media" style="background: radial-gradient(ellipse at 40% 60%, #0d2a1a 0%, #0d0f0c 70%);">
+    <div class="rps-art">
+      <span class="rps-icon">🌊</span>
+      <span class="rps-icon">📦</span>
+      <span class="rps-icon">🌫️</span>
+    </div>
+    <div class="card-tag">Claude API · JS</div>
+  </div>
+  <div class="card-body">
+    <h3 class="card-title">Driftward</h3>
+    <p class="card-desc">A live AI-driven text adventure — Claude acts as game master, generating every room and consequence on the fly. Structured JSON prompting drives real-time stat tracking (trust, curiosity, danger) parsed directly from the model's output.</p>
+    <div class="card-links">
+      <a href="driftward.html" class="link-chip">▶ Play Now</a>
+      <a href="https://github.com/veqzii" target="_blank" class="link-chip">Source ↗</a>
+    </div>
+  </div>
+</article>
         
         <!-- PLACEHOLDER CARD 
         <article class="game-card game-card--add" id="addGameCard">
@@ -249,13 +269,8 @@
     </div>
   </section>
 
-Here are the two issues I can see in your code:
 
-Uni is duplicated — there are two tl-item blocks for "BSc Computer Games Technology 2019–2023", and the second one also has an unclosed <div> from the first entry.
-Skills panel — the closing tags for the career layout are mismatched due to the duplication, which breaks the flex layout and pushes the skills panel out of place.
-
-Here's the corrected Career section HTML — replace everything from <!-- ░░ CAREER ░░ --> to the closing </section>:
-html<!-- ░░ CAREER ░░ -->
+<!-- ░░ CAREER ░░ -->
 <section class="section section--dark" id="career">
   <div class="container">
     <div class="section-header">
