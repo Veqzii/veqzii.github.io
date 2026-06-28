@@ -508,6 +508,20 @@ body.cur-hover .cursor {
 .link-doc { color: #67e8f9; border-color: rgba(103,232,249,0.25); }
 .link-doc:hover { border-color: #67e8f9; color: #67e8f9; }
 
+/* ── DESIGN CONCEPT CARDS ──
+   Visually distinct from dev cards: warm accent default,
+   tech-row reads as design considerations, not a stack list. */
+.concept-card .card-tag {
+  color: var(--mint-dim);
+}
+.concept-card .card-tech span {
+  background: rgba(245, 166, 35, 0.08);
+  color: #e0b46a;
+  border: 1px solid rgba(245, 166, 35, 0.18);
+  font-style: italic;
+}
+.concept-card .card-icon { font-size: 20px; }
+
 /* ── ART GRID ── */
 .art-grid {
   display: grid;
