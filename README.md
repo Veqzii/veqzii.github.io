@@ -45,7 +45,7 @@ A fully browser-playable roguelike dungeon crawler built from scratch in vanilla
 ### Rock · Paper · Scissors
 > * · SDL2 · SDL2_ttf*
 
-A polished 2D arcade game built entirely with SDL2 rendering primitives - no sprite sheets or external assets. All hand shapes are drawn programmatically.
+A polished 2D arcade game built entirely with SDL2 rendering primitives no sprite sheets or external assets. All hand shapes are drawn programmatically.
 
 - Animated throw sequence with sine-wave bounce physics
 - RNG CPU opponent with dramatic reveal fade-in
