@@ -522,6 +522,79 @@ body.cur-hover .cursor {
 }
 .concept-card .card-icon { font-size: 20px; }
 
+/* ── FEATURE CARDS (glowing gradient) ── */
+.feature-section { padding-top: 40px; }
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 936px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  cursor: none;
+}
+
+.feature-glow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 300px;
+  opacity: 0.6;
+  border-radius: 40px;
+  pointer-events: none;
+  background: var(--fc-gradient);
+  filter: blur(45px);
+}
+
+.feature-fg {
+  position: relative;
+  align-self: stretch;
+  height: 300px;
+  border-radius: 40px;
+  z-index: 1;
+  overflow: hidden;
+  border: 8px solid transparent;
+  background: linear-gradient(#1A1A1C, #1A1A1C) padding-box, var(--fc-gradient) border-box;
+  transition: transform 0.3s var(--ease);
+}
+.feature-card:hover .feature-fg { transform: translateY(-4px); }
+
+.feature-content {
+  width: 100%;
+  height: 100%;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.feature-icon { color: rgba(255, 255, 255, 0.9); margin-bottom: auto; }
+
+.feature-title {
+  color: #fff;
+  font-family: var(--head);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.feature-desc {
+  color: #9ca3af;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+.feature-desc::selection { background: rgba(255,255,255,0.2); }
+
 /* ── ART GRID ── */
 .art-grid {
   display: grid;
@@ -775,6 +848,9 @@ body.cur-hover .cursor {
   .game-card--featured .card-desc,
   .game-card--featured .card-tech,
   .game-card--featured .card-links { grid-column: 1; grid-row: auto; }
+  .feature-grid { grid-template-columns: 1fr; gap: 40px; max-width: 320px; }
+  .feature-card { max-width: 260px; }
+  .feature-glow, .feature-fg { height: 260px; }
   .art-grid { grid-template-columns: 1fr; }
   .art-item--wide { grid-column: 1; }
   .career-layout { grid-template-columns: 1fr; gap: 48px; }
