@@ -12,7 +12,7 @@ document.addEventListener('mousemove', e => {
   cursor.style.top  = my + 'px';
 });
 
-document.querySelectorAll('a, button, .game-card, .art-item, .doc-row, .feature-card').forEach(el => {
+document.querySelectorAll('a, button, .game-card, .art-item, .doc-row').forEach(el => {
   el.addEventListener('mouseenter', () => document.body.classList.add('cur-hover'));
   el.addEventListener('mouseleave', () => document.body.classList.remove('cur-hover'));
 });
