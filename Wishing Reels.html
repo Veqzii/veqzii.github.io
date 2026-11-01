@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wishing Reels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef0f7;--panel:#fff;--ink:#18213a;--muted:#5d6784;--line:#d5daea;--gold:#8a5d00;--jade:#0d7a63;--violet:#6b3fc2;--reel:#f1ede0;--btnbg:#18213a;--btntxt:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1730;--panel:#16223f;--ink:#eaeefb;--muted:#9aa6c9;--line:#2a3860;--gold:#f2d58a;--jade:#6fd0b5;--violet:#b99cf5;--reel:#0b1226;--btnbg:#f2d58a;--btntxt:#1a1405}}
+:root[data-theme="dark"]{--bg:#0e1730;--panel:#16223f;--ink:#eaeefb;--muted:#9aa6c9;--line:#2a3860;--gold:#f2d58a;--jade:#6fd0b5;--violet:#b99cf5;--reel:#0b1226;--btnbg:#f2d58a;--btntxt:#1a1405}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Nunito Sans",system-ui,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 40px}
+h1{font:400 clamp(30px,6vw,46px)/1.1 Marcellus,Georgia,serif;margin:0 0 6px}
+.sub{margin:0 0 22px;color:var(--muted);max-width:62ch}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.machine,.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.machine{text-align:center;transition:box-shadow .3s}
+.machine.win5{box-shadow:0 0 0 2px var(--gold),0 0 36px color-mix(in srgb,var(--gold) 50%,transparent)}
+.machine.win4{box-shadow:0 0 0 2px var(--violet),0 0 28px color-mix(in srgb,var(--violet) 40%,transparent)}
+.board{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;max-width:420px;margin:4px auto 14px;padding:8px;background:var(--reel);border:2px solid var(--line);border-radius:12px}
+.board.flip{animation:flip .7s}
+.cell{aspect-ratio:1;display:grid;place-items:center;font-size:clamp(22px,7vw,38px);background:var(--panel);border-radius:8px}
+.cell.spin{filter:blur(1.2px)}
+.cell.hit{outline:3px solid var(--gold);background:color-mix(in srgb,var(--gold) 25%,var(--panel));animation:pulse .5s 2}
+.cell.pop{animation:pop .45s forwards}
+.cell.drop{animation:drop .5s both}
+.cell.zap{background:var(--gold);transition:background .2s}
+@keyframes pop{to{transform:scale(1.6);opacity:0}}
+@keyframes drop{from{transform:translateY(-140%);opacity:0}to{transform:none;opacity:1}}
+@keyframes pulse{50%{transform:scale(1.12)}}
+@keyframes flip{50%{transform:scaleX(-1)}}
+.status{min-height:3.2em;margin:0 0 12px;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;font-size:13px;color:var(--muted);margin:0 0 16px}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.opts{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+button{font:600 15px "Nunito Sans",sans-serif;cursor:pointer;border-radius:8px;padding:10px 16px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+button.go{background:var(--btnbg);color:var(--btntxt);border-color:var(--btnbg)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+.purse{margin-top:16px;display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;color:var(--muted)}
+.purse b{color:var(--ink);font-size:20px;font-variant-numeric:tabular-nums}
+h2{font:400 21px/1.2 Marcellus,Georgia,serif;margin:0 0 12px}
+.meter{position:relative;height:14px;border-radius:7px;background:var(--line);margin:32px 0 28px}
+.fill{height:100%;width:0;border-radius:7px;background:linear-gradient(90deg,var(--jade),var(--gold));transition:width .4s}
+.tick{position:absolute;top:-4px;width:2px;height:22px;background:var(--ink)}
+.tick span{position:absolute;top:24px;font-size:12px;color:var(--muted);white-space:nowrap;transform:translateX(-50%)}
+.rows{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0 0 16px;font-variant-numeric:tabular-nums}
+.rows dt{color:var(--muted)}.rows dd{margin:0;text-align:right;font-weight:600}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;border:1px solid var(--gold);color:var(--gold);font-size:13px;font-weight:600}
+.hist{list-style:none;margin:0;padding:0;max-height:170px;overflow-y:auto;font-size:14px}
+.hist li{padding:5px 0;border-top:1px solid var(--line)}
+.t5{color:var(--gold);font-weight:800}.t4{color:var(--violet);font-weight:800}
+details{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 18px}
+summary{cursor:pointer;font-weight:600}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin-top:10px}
+th,td{text-align:left;padding:6px 10px;border-top:1px solid var(--line)}
+.fine{color:var(--muted);font-size:13px;margin:10px 0 0}
+.reset{margin-top:12px;font-size:13px;padding:6px 12px;color:var(--muted)}
+.decide{margin:0 0 14px;padding:12px;border:1px solid var(--gold);border-radius:10px;text-align:left}
+.decide[hidden]{display:none}.decide p{margin:0 0 10px}.decide .row{display:flex;gap:10px;flex-wrap:wrap}
+.decide label{display:block;margin:0 0 10px;font-size:14px}
+.banner{min-height:1.4em;font-weight:800;color:var(--violet)}
+.winamt{min-height:1.6em;font:400 26px/1.2 Marcellus,Georgia,serif;color:var(--gold)}
+.winamt.on{animation:pulse .5s 2}
+@media(prefers-reduced-motion:reduce){.fill,.machine{transition:none}.cell,.board{animation:none!important}}
+.steps{padding-left:22px;margin:10px 0 14px}.steps li{margin:0 0 6px}
+.gloss{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:10px 16px;font-size:14px;margin:0}.gloss dt{font-weight:600}.gloss dd{margin:0;color:var(--muted)}
+@media(max-width:560px){.gloss{grid-template-columns:1fr;gap:2px}.gloss dd{margin-bottom:10px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Wishing Reels</h1>
+<p class="sub">Spin the 6×6 grid and match symbols in a line to win. Watch the pity meter: every spin without a jackpot raises your chances, until one is guaranteed. All money is pretend pounds.</p>
+<section class="grid">
+<div class="machine" id="machine">
+<div class="banner" id="banner"></div><div class="winamt" id="winamt" aria-live="polite"></div>
+<div class="board" id="board" role="img" aria-label="Six by six slot grid"></div>
+<p class="status" id="status" aria-live="polite">Spin to make a wish.</p>
+<p class="legend"><span><b>Match 3, 4 or 5</b> in a line: £1 · £3 · £6</span><span><b>8+ 🔮</b>: 2 free spins</span><span><b>12+ 👑</b>: £80 jackpot · <b>12+ 🗝️</b>: £26</span></p>
+<div class="decide" id="decide" hidden></div>
+<div class="controls"><button class="go" id="b1">Spin · £2</button><button id="auto">Auto-spin</button><button id="boost">Pity Boost +10 · £12</button></div>
+<div class="opts"><label><input type="checkbox" id="grav" checked> Gravity mode</label><label><input type="checkbox" id="turbo"> Turbo</label></div>
+<div class="purse"><span>Balance <b id="gems">£0</b></span><button id="top">Top up £100</button></div>
+</div>
+<aside class="panel">
+<h2>Pity tracker</h2>
+<div class="meter" aria-hidden="true"><div class="fill" id="fill"></div><div class="tick" style="left:calc(74/90*100%)"><span style="top:-20px">Odds rise · 74</span></div><div class="tick" style="right:0"><span style="transform:translateX(-100%)">Guaranteed · 90</span></div></div>
+<dl class="rows">
+<dt>Spins since last jackpot</dt><dd id="p5">0 / 90</dd>
+<dt>Jackpot chance next spin</dt><dd id="r5">0.6%</dd>
+<dt>Free spins guaranteed within</dt><dd id="p4">10 spins</dd>
+<dt>Next jackpot</dt><dd id="g"><span class="badge">50/50</span></dd>
+<dt>Most you can still pay for a jackpot</dt><dd id="ceil">£180</dd>
+<dt>Carry pot</dt><dd id="pot">–</dd>
+<dt>Total spins</dt><dd id="sp">0</dd>
+<dt>Jackpots won (featured)</dt><dd id="f5">0 (0)</dd>
+<dt>Average spins per jackpot</dt><dd id="avg">–</dd>
+<dt>Won minus spent</dt><dd id="net">£0</dd>
+</dl>
+<h2>Big wins</h2>
+<ul class="hist" id="hist"><li>No 4★ or 5★ yet.</li></ul>
+<button class="reset" id="reset">Reset progress</button>
+</aside>
+</section>
+<details open><summary>How to play</summary>
+<ol class="steps">
+<li><b>Spin for £2.</b> You start with £200 of pretend money and can top up any time.</li>
+<li><b>Match symbols.</b> 3, 4 or 5 of the same everyday symbol in a straight line (across, down or diagonal) win £1, £3 or £6. The winning line glows.</li>
+<li><b>Go for the big prizes.</b> 8 or more 🔮 gives 2 free spins. 12 or more 👑 or 🗝️ is a jackpot.</li>
+<li><b>Watch the pity meter.</b> Each spin without a jackpot makes the next one more likely, and spin 90 is guaranteed. Winning a jackpot resets the meter.</li>
+</ol>
+<dl class="gloss">
+<dt>Jackpot (5★)</dt><dd>👑 pays £80 and 🗝️ pays £26. Your chance starts at 0.6% per spin, climbs fast from spin 74, and reaches 100% at spin 90.</dd>
+<dt>The 50/50</dt><dd>Half of all jackpots are the featured 👑. If you get 🗝️ instead, your next jackpot is guaranteed to be 👑.</dd>
+<dt>Free spins (4★)</dt><dd>8+ 🔮 gives 2 spins at no cost. They still build your pity, and line wins pay ×1 then ×2. You get at least one of these every 10 spins.</dd>
+<dt>Cash out or carry</dt><dd>After winning a 👑 you choose. Cash out to take the money. Carry to double or nothing: your pity jumps to 73, and your next jackpot doubles the pot if it’s 👑 or loses it if it’s 🗝️. You can carry again after a win.</dd>
+<dt>Safety net</dt><dd>When you carry, pay 25% of the pot to keep half of it if you lose. It makes the risk smaller without changing your average result.</dd>
+<dt>Pity Boost</dt><dd>Pay £12 to add 10 to your pity, a shortcut past about 5 spins.</dd>
+<dt>Gravity mode</dt><dd>Winning symbols burst and new ones fall in. Switch the toggle off to keep the board still.</dd>
+<dt>Board events</dt><dd>Sometimes the board mirrors or flashes with lightning. It’s just for show and never changes your odds.</dd>
+<dt>Auto-spin and Turbo</dt><dd>Auto-spin keeps going until you stop it, run out of money, or win a 👑 that needs your choice. Turbo speeds up the animations.</dd>
+<dt>Payback</dt><dd>Around 94% over many spins if you always cash out.</dd>
+</dl>
+</details>
+</main>
+<script>
+const STAKE=2,PAY={s:26,f:80},LINE={3:1,4:3,5:6},KEY="wishingReelsV4",$=id=>document.getElementById(id);
+const gbp=x=>"£"+x.toLocaleString("en-GB",{minimumFractionDigits:x%1?2:0,maximumFractionDigits:2});
+const COMMON=["🗡️","🛡️","🏹","📖","🪙","🧪"],ALL=[...COMMON,"🔮","👑","🗝️"],rnd=n=>Math.random()*n|0;
+const fresh=()=>({cash:200,p5:0,p4:0,guar:false,spins:0,fives:0,feat:0,sum:0,log:[],pot:0,pend:0,won:0,spent:0,ins:false});
+let S;try{S=JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){S=fresh()}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,reduce?0:ms*($("turbo").checked?0.25:1)));
+let busy=false,auto=false;
+const board=$("board");
+for(let i=0;i<36;i++){const d=document.createElement("div");d.className="cell";d.textContent=COMMON[rnd(6)];board.appendChild(d)}
+const cells=[...board.children];
+
+function rate5(n){return n>=90?1:n>=74?0.006+0.06*(n-73):0.006}
+const pct=x=>(x*100).toFixed(1)+"%";
+
+function pull(){
+  S.p5++;S.p4++;S.spins++;
+  const n=S.p5;
+  if(Math.random()<rate5(n)){
+    const feat=S.guar||Math.random()<0.5;
+    S.guar=!feat;S.fives++;S.sum+=n;if(feat)S.feat++;S.p5=0;
+    const r={t:5,f:feat,n,s:S.spins};S.log.push(r);return r;
+  }
+  if(S.p4>=10||Math.random()<0.051){S.p4=0;const r={t:4,s:S.spins};S.log.push(r);return r}
+  return {t:3,s:S.spins};
+}
+
+const DIRS={"horizontal":[0,1],"vertical":[1,0],"diagonal ↘":[1,1],"diagonal ↗":[-1,1]};
+function run(g,i,d){const s=g[i],r=i/6|0,c=i%6;let n=1;for(const k of [1,-1]){let a=r+d[0]*k,b=c+d[1]*k;while(a>=0&&a<6&&b>=0&&b<6&&g[a*6+b]===s){n++;a+=d[0]*k;b+=d[1]*k}}return n}
+function rollLine(){const x=Math.random();return x<.02?5:x<.09?4:x<.30?3:0}
+function deal(r,L){
+  const g=Array(36).fill(null);let win=[],sym="",nm="";
+  if(r.t>=4){
+    const main=r.t===5?(r.f?"👑":"🗝️"):"🔮",cnt=r.t===5?12+rnd(5):8+rnd(3);
+    win=[...g.keys()].sort(()=>Math.random()-.5).slice(0,cnt);win.forEach(i=>g[i]=main);
+  }else if(L){
+    const names=Object.keys(DIRS);sym=COMMON[rnd(6)];
+    for(let t=0;t<60&&!win.length;t++){
+      nm=names[rnd(4)];const d=DIRS[nm],r0=rnd(6),c0=rnd(6),r1=r0+d[0]*(L-1),c1=c0+d[1]*(L-1);
+      if(r1<0||r1>5||c1<0||c1>5)continue;
+      win=[...Array(L).keys()].map(i=>(r0+d[0]*i)*6+c0+d[1]*i);
+    }
+    if(!win.length){nm="horizontal";win=[...Array(L).keys()]}
+    win.forEach(i=>g[i]=sym);
+  }
+  for(let i=0;i<36;i++)if(!g[i]){
+    const o=COMMON.slice().sort(()=>Math.random()-.5);
+    g[i]=o.find(s=>{g[i]=s;return Object.values(DIRS).every(d=>run(g,i,d)<3)})||o[0];
+  }
+  return {g,win:new Set(win),sym,nm};
+}
+
+async function animate(f){
+  cells.forEach(e=>e.classList.add("spin"));
+  const tm=[0,1,2,3,4,5].map(c=>setInterval(()=>{for(let r=0;r<6;r++)cells[r*6+c].textContent=ALL[rnd(9)]},70));
+  for(let c=0;c<6;c++){
+    await sleep(reduce?0:350+c*230);clearInterval(tm[c]);
+    for(let r=0;r<6;r++){const e=cells[r*6+c];e.classList.remove("spin");e.textContent=f.g[r*6+c]}
+  }
+}
+
+async function effects(f){
+  let ev="";
+  if(Math.random()<0.35){
+    if(!f.win.size&&Math.random()<0.5){
+      board.classList.add("flip");await sleep(reduce?0:350);
+      for(let r=0;r<6;r++){const row=f.g.slice(r*6,r*6+6).reverse();row.forEach((s,c)=>{f.g[r*6+c]=s;cells[r*6+c].textContent=s})}
+      f.win=new Set([...f.win].map(i=>(i/6|0)*6+5-i%6));
+      await sleep(reduce?0:350);board.classList.remove("flip");ev="Switch event: the board mirrored.";
+    }else{
+      const z=[...cells.keys()].sort(()=>Math.random()-.5).slice(0,9);
+      z.forEach(i=>cells[i].classList.add("zap"));await sleep(reduce?0:450);
+      z.forEach(i=>cells[i].classList.remove("zap"));ev="Lightning event: just for show.";
+    }
+  }
+  if(f.win.size){
+    f.win.forEach(i=>cells[i].classList.add("hit"));await sleep(reduce?0:1600);
+    if($("grav").checked){
+      f.win.forEach(i=>{cells[i].classList.remove("hit");cells[i].classList.add("pop")});await sleep(reduce?0:450);
+      const cols=new Set();
+      f.win.forEach(i=>{cols.add(i%6);cells[i].classList.remove("pop");cells[i].textContent=COMMON[rnd(6)]});
+      cols.forEach(c=>{for(let r=0;r<6;r++){const e=cells[r*6+c];e.style.animationDelay=(r*45)+"ms";e.classList.add("drop")}});
+      await sleep(reduce?0:700);
+      cells.forEach(e=>{e.classList.remove("drop");e.style.animationDelay=""});
+      ev+=(ev?" ":"")+"Gravity: "+f.win.size+" symbols burst and fell away.";
+    }else f.win.forEach(i=>cells[i].classList.remove("hit"));
+  }
+  return ev;
+}
+
+async function round(free,mult){
+  const r=pull(),L=r.t===3?rollLine():0,f=deal(r,L);
+  await animate(f);
+  const ev=await effects(f);
+  let note="",win=0;
+  if(r.t===4)note=free?"4★ scatter, no retrigger.":"8+ 🔮 trigger 2 free spins!";
+  else if(r.t===3&&L){win=LINE[L]*mult;note="Line of "+L+" "+f.sym+" ("+f.nm+") pays "+gbp(win)+(mult>1?" (×"+mult+")":"")+"."}
+  else if(r.t===3)note="No line. Pity is "+S.p5+" of 90.";
+  else if(r.f){
+    const P=S.pot?S.pot*2:PAY.f;S.pot=0;S.ins=false;S.pend=P;
+    note="Featured 5★ on spin "+r.n+(r.n>=74?" (soft pity helped)":"")+". "+(P>PAY.f?"Your carried pot doubled to "+gbp(P)+".":"You won the 50/50.");
+  }else if(S.pot){
+    if(S.ins){const b=S.pot/2;win=b;note="Standard 5★ on spin "+r.n+". Your safety net saved "+gbp(b)+" of the "+gbp(S.pot)+" pot."}
+    else note="Standard 5★ on spin "+r.n+". The carried pot of "+gbp(S.pot)+" is lost.";
+    note+=" Your next 5★ is guaranteed featured.";S.pot=0;S.ins=false;
+  }else{win=PAY.s;note="Standard 5★ on spin "+r.n+" pays "+gbp(PAY.s)+". You lost the 50/50, so your next 5★ is guaranteed featured."}
+  S.cash+=win;S.won+=win;
+  const w=$("winamt");w.textContent=win?"Win "+gbp(win):"";w.classList.remove("on");void w.offsetWidth;if(win)w.classList.add("on");
+  return {r,note:note+(ev?" "+ev:"")};
+}
+
+async function spin(){
+  if(busy)return;
+  if(S.pend||S.cash<STAKE){$("status").textContent=S.pend?"Choose cash out or carry first.":"Not enough money. Top up to keep wishing.";return}
+  busy=true;setButtons();
+  const m=$("machine");m.classList.remove("win4","win5");
+  $("status").textContent="Spinning…";$("winamt").textContent="";
+  S.cash-=STAKE;S.spent+=STAKE;
+  let o=await round(false,1),top=o.r;const notes=[o.note];
+  if(o.r.t===4)for(let j=1;j<=2;j++){
+    $("banner").textContent="Free spin "+j+" of 2 · line wins ×"+j;
+    await sleep(700);o=await round(true,j);notes.push("Free spin "+j+": "+o.note);
+    if(o.r.t>top.t)top=o.r;if(o.r.t===5)break;
+  }
+  $("banner").textContent="";
+  $("status").textContent=notes.join(" ");
+  if(top.t===5&&top.f)m.classList.add("win5");else if(top.t>=4)m.classList.add("win4");
+  S.log=S.log.slice(-40);save();busy=false;render();
+}
+
+function setButtons(){
+  const off=busy||S.pend>0;
+  $("b1").disabled=off||S.cash<STAKE;$("auto").disabled=!auto&&(off||S.cash<STAKE);
+  $("boost").disabled=off||S.cash<12||S.p5>=89;
+}
+
+function decide(carry){
+  const P=S.pend;if(!P)return;S.pend=0;
+  if(carry){
+    const ins=$("ins")&&$("ins").checked&&S.cash>=P*0.25;
+    if(ins){S.cash-=P*0.25;S.spent+=P*0.25;S.ins=true}
+    S.pot=P;S.p5=73;
+    $("status").textContent="Carrying "+gbp(P)+(ins?" with a safety net":"")+". Pity jumps to 73, so your next spin has a 6.6% chance of a 5★. A featured 5★ doubles the pot and a standard one loses it.";
+  }else{S.cash+=P;S.won+=P;$("status").textContent="Cashed out "+gbp(P)+"."}
+  $("machine").classList.remove("win5","win4");save();render();
+}
+
+function render(){
+  const next=S.p5+1;
+  $("gems").textContent=gbp(S.cash);
+  $("ceil").textContent=gbp((90-S.p5)*STAKE);
+  $("pot").textContent=S.pot?gbp(S.pot)+(S.ins?" (insured)":""):"–";
+  const n=S.won-S.spent;$("net").textContent=(n<0?"−":"+")+gbp(Math.abs(n));
+  const d=$("decide"),was=!d.hidden;d.hidden=!S.pend;
+  if(S.pend&&!was)d.innerHTML='<p><b>Prize: '+gbp(S.pend)+'.</b> Cash it, or carry it. Carrying drops pity to 73. Your next 5★ doubles the prize if it’s featured, and loses it if it’s a standard 5★.</p><label><input type="checkbox" id="ins"> Add a safety net for '+gbp(S.pend*0.25)+': keep half the pot if you bust</label><div class="row"><button class="go" onclick="decide(false)">Cash out '+gbp(S.pend)+'</button><button onclick="decide(true)">Carry for '+gbp(S.pend*2)+' or nothing</button></div>';
+  $("fill").style.width=Math.min(S.p5/90*100,100)+"%";
+  $("p5").textContent=S.p5+" / 90";
+  $("r5").textContent=pct(rate5(next))+(next>=74?" (soft pity)":"");
+  $("p4").textContent=(10-S.p4)+" spin"+(10-S.p4===1?"":"s");
+  $("g").innerHTML=S.guar?'<span class="badge">Guaranteed featured</span>':'<span class="badge">50/50</span>';
+  $("sp").textContent=S.spins;
+  $("f5").textContent=S.fives+" ("+S.feat+")";
+  $("avg").textContent=S.fives?(S.sum/S.fives).toFixed(1):"–";
+  const h=S.log.slice(-12).reverse().map(r=>r.t===5
+    ?'<li><span class="t5">5★ '+(r.f?"Featured":"Standard")+"</span> on spin "+r.s+" (pity "+r.n+")</li>"
+    :'<li><span class="t4">4★</span> on spin '+r.s+"</li>").join("");
+  $("hist").innerHTML=h||"<li>No 4★ or 5★ yet.</li>";
+  setButtons();
+}
+
+$("b1").onclick=()=>spin(1);
+$("auto").onclick=async()=>{
+  if(auto){auto=false;return}
+  auto=true;$("auto").textContent="Stop auto";
+  while(auto&&!S.pend&&S.cash>=STAKE)await spin();
+  auto=false;$("auto").textContent="Auto-spin";render();
+};
+$("boost").onclick=()=>{if(busy||S.pend||S.cash<12)return;S.cash-=12;S.spent+=12;S.p5=Math.min(89,S.p5+10);$("status").textContent="Pity Boost: pity is now "+S.p5+" of 90.";save();render()};
+$("top").onclick=()=>{S.cash+=100;save();render()};
+$("reset").onclick=()=>{if(busy)return;S=fresh();save();$("machine").classList.remove("win4","win5");$("status").textContent="Progress reset. Spin to make a wish.";cells.forEach(e=>e.textContent=COMMON[rnd(6)]);render()};
+render();
+</script>
+</body>
+</html>
